@@ -2,8 +2,10 @@
   "name": "symmetry-news-backend",
   "private": true,
   "type": "module",
-  "description": "Firestore and Cloud Storage rules and rules tests for the journalist articles.",
+  "description": "Firestore and Cloud Storage rules, rules tests and seed data for the journalist articles.",
   "scripts": {
+    "emulators": "firebase emulators:start",
+    "seed": "node scripts/seed.mjs",
     "test:rules": "firebase emulators:exec --project demo-symmetry-news --only firestore,storage \"node --test test/*.test.mjs\""
   },
   "devDependencies": {

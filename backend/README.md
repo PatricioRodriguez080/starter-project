@@ -53,6 +53,15 @@ To run the application locally, use the following command:
 
 ```firebase emulators:start```
 
+### Seeding the emulator with sample articles
+The emulator starts empty. To create the `articles` collection with sample articles and their thumbnails in
+`media/articles`, install the dependencies once and, with the emulators running, run the seed script in another terminal:
+```
+npm install
+npm run seed
+```
+The script writes through `firestore.rules` and `storage.rules`, so the sample data always follows the [schema](docs/DB_SCHEMA.md).
+
 ## Testing the rules
 `firestore.rules` and `storage.rules` are covered by tests in the `test` folder
 (written with [@firebase/rules-unit-testing](https://firebase.google.com/docs/rules/unit-tests)).
