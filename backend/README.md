@@ -43,7 +43,21 @@ firebase deploy
 This will deploy all the rules you write in `firestore.rules` to your Firebase Firestore project.
 Be careful becasuse it will overwrite the existing firestore.rules file of your project.
 
+> **Cloud Storage and the Blaze plan**: since February 3, 2026, Firebase only provisions new Cloud Storage buckets for
+> projects on the pay-as-you-go [Blaze plan](https://firebase.google.com/docs/storage/faqs-storage-changes-announced-sept-2024).
+> On the free Spark plan, Cloud Storage only works in the Local Emulator Suite, so deploy only the Firestore rules and
+> indexes with `firebase deploy --only firestore`. On a Blaze project, `firebase deploy` also deploys `storage.rules`.
+
 ## Running the project in a local emulator
 To run the application locally, use the following command:
 
 ```firebase emulators:start```
+
+## Testing the rules
+`firestore.rules` and `storage.rules` are covered by tests in the `test` folder
+(written with [@firebase/rules-unit-testing](https://firebase.google.com/docs/rules/unit-tests)).
+They start the Firestore and Storage emulators with a demo project, so they never touch a real Firebase project:
+```
+npm install
+npm run test:rules
+```

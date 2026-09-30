@@ -2,7 +2,7 @@
 
 This document describes how the journalist-uploaded **Articles** are stored in the Firebase backend:
 the documents live in **Firebase Firestore** and their thumbnails live in **Firebase Cloud Storage**.
-The constraints listed here are the contract that `firestore.rules` and `storage.rules` must enforce.
+The constraints listed here are the contract that `firestore.rules` and `storage.rules` enforce.
 
 ## Overview
 
@@ -72,6 +72,24 @@ articles/Xy7Qp2LmT9aB3cD4eF5g
 - The Firestore document stores the image's **download URL** in `thumbnailURL`. The URL can be passed directly to
   the image widgets, and the Storage reference can be recovered from it (`FirebaseStorage.refFromURL`).
 
+## Access rules
+
+Enforced by `firestore.rules` and `storage.rules`, and covered by the tests in `backend/test/`.
+
+| Resource                    | Read   | Create                                   | Update / Delete |
+|-----------------------------|--------|------------------------------------------|-----------------|
+| `articles/{articleId}`      | anyone | anyone, if the document follows the schema | nobody          |
+| `media/articles/{fileName}` | anyone | anyone, if the file follows the schema and does not exist yet | nobody |
+| anything else               | nobody | nobody                                   | nobody          |
+
+`thumbnailURL` must point to this project's bucket (`symmetry-news-1d028.firebasestorage.app`), so a thumbnail
+cannot be served from another bucket where `storage.rules` do not apply. When deploying to another Firebase project,
+update the bucket name in `firestore.rules`.
+
+The rules accept download URLs from Cloud Storage (`https://firebasestorage.googleapis.com`) and from the Storage
+emulator (`http://localhost:9199`, `http://127.0.0.1:9199` and `http://10.0.2.2:9199`, the address of the host
+machine from the Android emulator), so the same rules work in the Local Emulator Suite and in production.
+
 ## Design decisions
 
 The schema is based on the articles the app already consumes from [NewsAPI](https://newsapi.org/docs/endpoints/top-headlines)
@@ -95,5 +113,9 @@ The schema is based on the articles the app already consumes from [NewsAPI](http
 - **Server-side date**: `publishedAt` is set from the server time on creation, so a client cannot backdate or
   post-date an article.
 - **No authentication yet**: the backend setup (`backend/README.md`) only enables Firestore, Cloud Storage and the
-  Local Emulator Suite, so articles store the author's name instead of a user ID. Adding Firebase Authentication and an
-  `authorId` field would allow the rules to restrict editing and deleting to the article's author.
+  Local Emulator Suite, so articles store the author's name instead of a user ID.
+- **Immutable articles and thumbnails**: without authentication nobody can prove to be the author of an article, so
+  allowing updates or deletions would let anyone edit or remove someone else's work. Adding Firebase Authentication and
+  an `authorId` field would allow the rules to restrict editing and deleting to the article's author.
+- **Orphan thumbnails**: if the upload succeeds but the document creation fails, the image stays in Storage without an
+  article. Cleaning them up (for example with a scheduled Cloud Function) is left as a future improvement.

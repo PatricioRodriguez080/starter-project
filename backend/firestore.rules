@@ -1,7 +1,51 @@
 rules_version = '2';
 
+// Enforces the schema documented in docs/DB_SCHEMA.md.
 service cloud.firestore {
   match /databases/{database}/documents {
-    // TODO: WRITE ANY NECESSARY FIRESTORE RULES HERE
+
+    match /articles/{articleId} {
+      allow read: if true;
+      allow create: if isValidArticleId(articleId)
+        && isValidArticle(request.resource.data, articleId);
+      // Articles are immutable: without authentication nobody can prove to be their author.
+      allow update, delete: if false;
+    }
+
+    function isValidArticleId(articleId) {
+      return articleId.matches('[A-Za-z0-9]+');
+    }
+
+    function isValidArticle(article, articleId) {
+      return hasExactlyArticleFields(article)
+        && isNonBlankStringUpTo(article.title, 150)
+        && isNonBlankStringUpTo(article.description, 300)
+        && isNonBlankStringUpTo(article.content, 20000)
+        && isNonBlankStringUpTo(article.author, 100)
+        && isArticleThumbnailURL(article.thumbnailURL, articleId)
+        && article.publishedAt == request.time;
+    }
+
+    function hasExactlyArticleFields(article) {
+      let fields = ['title', 'description', 'content', 'author', 'thumbnailURL', 'publishedAt'];
+      return article.keys().hasAll(fields) && article.keys().hasOnly(fields);
+    }
+
+    function isNonBlankStringUpTo(value, maxLength) {
+      return value is string
+        && value.size() <= maxLength
+        && value.matches('(?s).*\\S.*');
+    }
+
+    // Download URL of media/articles/{articleId}.{extension} in this project's bucket, served by
+    // Cloud Storage or by the Storage emulator (localhost / Android emulator host).
+    // The bucket is fixed so a thumbnail cannot point to a bucket where storage.rules do not apply.
+    function isArticleThumbnailURL(url, articleId) {
+      let storageHost = '(https://firebasestorage\\.googleapis\\.com|http://(localhost|127\\.0\\.0\\.1|10\\.0\\.2\\.2):9199)';
+      let storageBucket = 'symmetry-news-1d028\\.firebasestorage\\.app';
+      let thumbnailPath = '/v0/b/' + storageBucket + '/o/media%2Farticles%2F' + articleId + '\\.(jpg|jpeg|png|webp)';
+      let downloadQuery = '\\?alt=media(&token=[0-9a-f-]+)?';
+      return url is string && url.matches(storageHost + thumbnailPath + downloadQuery);
+    }
   }
 }
