@@ -30,7 +30,7 @@ class SavedArticles extends HookWidget {
         builder: (context) => GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTap: () => _onBackButtonTapped(context),
-          child: const Icon(Ionicons.chevron_back, color: Colors.black),
+          child: const Icon(Ionicons.chevronBack, color: Colors.black),
         ),
       ),
       title: const Text('Saved Articles', style: TextStyle(color: Colors.black)),
