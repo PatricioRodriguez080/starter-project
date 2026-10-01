@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:news_app_clean_architecture/features/daily_news/presentation/bloc/article/remote/remote_article_bloc.dart';
 import 'package:news_app_clean_architecture/features/daily_news/presentation/bloc/article/remote/remote_article_state.dart';
+import 'package:news_app_clean_architecture/features/journalist_articles/presentation/bloc/published_articles/published_articles_cubit.dart';
+import 'package:news_app_clean_architecture/features/journalist_articles/presentation/screens/published_articles/published_articles_screen.dart';
 
 import '../../../domain/entities/article.dart';
 import '../../widgets/article_tile.dart';
@@ -12,10 +14,27 @@ class DailyNews extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _buildPage();
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        appBar: _buildAppbar(context),
+        body: TabBarView(
+          children: [
+            _buildDailyNewsTab(),
+            const PublishedArticlesScreen(),
+          ],
+        ),
+        floatingActionButton: Builder(
+          builder: (tabContext) => FloatingActionButton(
+            onPressed: () => _onAddArticlePressed(tabContext),
+            child: const Icon(Icons.add),
+          ),
+        ),
+      ),
+    );
   }
 
-  _buildAppbar(BuildContext context) {
+  PreferredSizeWidget _buildAppbar(BuildContext context) {
     return AppBar(
       title: const Text(
         'Daily News',
@@ -30,31 +49,34 @@ class DailyNews extends StatelessWidget {
           ),
         ),
       ],
+      bottom: const TabBar(
+        labelColor: Colors.black,
+        tabs: [
+          Tab(text: 'Daily News'),
+          Tab(text: 'Journalists'),
+        ],
+      ),
     );
   }
 
-  _buildPage() {
+  Widget _buildDailyNewsTab() {
     return BlocBuilder<RemoteArticlesBloc, RemoteArticlesState>(
       builder: (context, state) {
         if (state is RemoteArticlesLoading) {
-          return Scaffold(
-              appBar: _buildAppbar(context),
-              body: const Center(child: CupertinoActivityIndicator()));
+          return const Center(child: CupertinoActivityIndicator());
         }
         if (state is RemoteArticlesError) {
-          return Scaffold(
-              appBar: _buildAppbar(context),
-              body: const Center(child: Icon(Icons.refresh)));
+          return const Center(child: Icon(Icons.refresh));
         }
         if (state is RemoteArticlesDone) {
-          return _buildArticlesPage(context, state.articles!);
+          return _buildArticlesList(context, state.articles!);
         }
         return const SizedBox();
       },
     );
   }
 
-  Widget _buildArticlesPage(
+  Widget _buildArticlesList(
       BuildContext context, List<ArticleEntity> articles) {
     List<Widget> articleWidgets = [];
     for (var article in articles) {
@@ -64,18 +86,18 @@ class DailyNews extends StatelessWidget {
       ));
     }
 
-    return Scaffold(
-      appBar: _buildAppbar(context),
-      body: ListView(
-        children: articleWidgets,
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // TODO: REPLACE ROUTE WITH YOUR "ADD ARTICLE" PAGE
-        },
-        child: const Icon(Icons.add),
-      ),
+    return ListView(
+      children: articleWidgets,
     );
+  }
+
+  /// Opens the form to publish an article and, once it is published,
+  /// reloads the journalists' articles and shows their tab.
+  Future<void> _onAddArticlePressed(BuildContext tabContext) async {
+    final publishedArticle = await Navigator.pushNamed(tabContext, '/PublishArticle');
+    if (publishedArticle == null || !tabContext.mounted) return;
+    tabContext.read<PublishedArticlesCubit>().loadArticles();
+    DefaultTabController.of(tabContext).animateTo(1);
   }
 
   void _onArticlePressed(BuildContext context, ArticleEntity article) {

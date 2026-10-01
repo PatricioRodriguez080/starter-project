@@ -28,6 +28,22 @@ class ArticleDraftEntity extends Equatable {
     this.thumbnail,
   });
 
+  ArticleDraftEntity copyWith({
+    String? title,
+    String? description,
+    String? content,
+    String? author,
+    ArticleThumbnailEntity? thumbnail,
+  }) {
+    return ArticleDraftEntity(
+      title: title ?? this.title,
+      description: description ?? this.description,
+      content: content ?? this.content,
+      author: author ?? this.author,
+      thumbnail: thumbnail ?? this.thumbnail,
+    );
+  }
+
   ArticleDraftError? get titleError => _findTextError(title, maxTitleLength);
 
   ArticleDraftError? get descriptionError =>

@@ -48,6 +48,34 @@ void main() {
     expect(const ArticleDraftEntity().isValid, isFalse);
   });
 
+  group('copyWith', () {
+    test('changes only the given fields', () {
+      final draft = buildValidDraft();
+
+      final edited = draft.copyWith(title: 'A new title');
+
+      expect(edited.title, 'A new title');
+      expect(edited.description, draft.description);
+      expect(edited.content, draft.content);
+      expect(edited.author, draft.author);
+      expect(edited.thumbnail, draft.thumbnail);
+    });
+
+    test('adds a thumbnail to a draft without one', () {
+      final edited = const ArticleDraftEntity().copyWith(thumbnail: validThumbnail);
+
+      expect(edited.thumbnail, validThumbnail);
+    });
+
+    test('does not modify the original draft', () {
+      final draft = buildValidDraft();
+
+      draft.copyWith(title: 'A new title');
+
+      expect(draft, buildValidDraft());
+    });
+  });
+
   final textFields = <String, ({int maxLength, ArticleDraftError? Function(ArticleDraftEntity) errorOf, ArticleDraftEntity Function(String) draftWith})>{
     'title': (
       maxLength: ArticleDraftEntity.maxTitleLength,

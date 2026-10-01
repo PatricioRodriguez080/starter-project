@@ -10,6 +10,11 @@ import 'features/daily_news/domain/usecases/get_saved_article.dart';
 import 'features/daily_news/domain/usecases/remove_article.dart';
 import 'features/daily_news/domain/usecases/save_article.dart';
 import 'features/daily_news/presentation/bloc/article/local/local_article_bloc.dart';
+import 'features/journalist_articles/domain/use_cases/get_published_articles.dart';
+import 'features/journalist_articles/domain/use_cases/pick_article_thumbnail.dart';
+import 'features/journalist_articles/domain/use_cases/publish_article.dart';
+import 'features/journalist_articles/presentation/bloc/publish_article/publish_article_cubit.dart';
+import 'features/journalist_articles/presentation/bloc/published_articles/published_articles_cubit.dart';
 
 final sl = GetIt.instance;
 
@@ -54,6 +59,19 @@ Future<void> initializeDependencies() async {
   sl.registerFactory<LocalArticleBloc>(
     ()=> LocalArticleBloc(sl(),sl(),sl())
   );
+
+  _initializeJournalistArticlesDependencies();
+}
+
+void _initializeJournalistArticlesDependencies() {
+  //UseCases
+  sl.registerSingleton<GetPublishedArticlesUseCase>(GetPublishedArticlesUseCase());
+  sl.registerSingleton<PublishArticleUseCase>(PublishArticleUseCase());
+  sl.registerSingleton<PickArticleThumbnailUseCase>(PickArticleThumbnailUseCase());
+
+  //Cubits
+  sl.registerFactory<PublishedArticlesCubit>(() => PublishedArticlesCubit(sl()));
+  sl.registerFactory<PublishArticleCubit>(() => PublishArticleCubit(sl(), sl()));
 
 
 }
