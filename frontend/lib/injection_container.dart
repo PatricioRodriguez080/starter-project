@@ -10,6 +10,14 @@ import 'features/daily_news/domain/usecases/get_saved_article.dart';
 import 'features/daily_news/domain/usecases/remove_article.dart';
 import 'features/daily_news/domain/usecases/save_article.dart';
 import 'features/daily_news/presentation/bloc/article/local/local_article_bloc.dart';
+import 'features/journalist_articles/data/data_sources/local/article_thumbnail_gallery_data_source.dart';
+import 'features/journalist_articles/data/data_sources/remote/article_thumbnail_remote_data_source.dart';
+import 'features/journalist_articles/data/data_sources/remote/firebase_emulators.dart';
+import 'features/journalist_articles/data/data_sources/remote/journalist_article_remote_data_source.dart';
+import 'features/journalist_articles/data/repository/article_thumbnail_repository_impl.dart';
+import 'features/journalist_articles/data/repository/journalist_article_repository_impl.dart';
+import 'features/journalist_articles/domain/repository/article_thumbnail_repository.dart';
+import 'features/journalist_articles/domain/repository/journalist_article_repository.dart';
 import 'features/journalist_articles/domain/use_cases/get_published_articles.dart';
 import 'features/journalist_articles/domain/use_cases/pick_article_thumbnail.dart';
 import 'features/journalist_articles/domain/use_cases/publish_article.dart';
@@ -60,18 +68,27 @@ Future<void> initializeDependencies() async {
     ()=> LocalArticleBloc(sl(),sl(),sl())
   );
 
-  _initializeJournalistArticlesDependencies();
+  await _initializeJournalistArticlesDependencies();
 }
 
-void _initializeJournalistArticlesDependencies() {
+Future<void> _initializeJournalistArticlesDependencies() async {
+  await connectToFirebaseEmulatorsIfEnabled();
+
+  //Data sources
+  sl.registerSingleton<JournalistArticleRemoteDataSource>(JournalistArticleRemoteDataSourceImpl());
+  sl.registerSingleton<ArticleThumbnailRemoteDataSource>(ArticleThumbnailRemoteDataSourceImpl());
+  sl.registerSingleton<ArticleThumbnailGalleryDataSource>(ArticleThumbnailGalleryDataSourceImpl());
+
+  //Repositories
+  sl.registerSingleton<JournalistArticleRepository>(JournalistArticleRepositoryImpl(sl(), sl()));
+  sl.registerSingleton<ArticleThumbnailRepository>(ArticleThumbnailRepositoryImpl(sl()));
+
   //UseCases
-  sl.registerSingleton<GetPublishedArticlesUseCase>(GetPublishedArticlesUseCase());
-  sl.registerSingleton<PublishArticleUseCase>(PublishArticleUseCase());
-  sl.registerSingleton<PickArticleThumbnailUseCase>(PickArticleThumbnailUseCase());
+  sl.registerSingleton<GetPublishedArticlesUseCase>(GetPublishedArticlesUseCase(sl()));
+  sl.registerSingleton<PublishArticleUseCase>(PublishArticleUseCase(sl()));
+  sl.registerSingleton<PickArticleThumbnailUseCase>(PickArticleThumbnailUseCase(sl()));
 
   //Cubits
   sl.registerFactory<PublishedArticlesCubit>(() => PublishedArticlesCubit(sl()));
   sl.registerFactory<PublishArticleCubit>(() => PublishArticleCubit(sl(), sl()));
-
-
 }

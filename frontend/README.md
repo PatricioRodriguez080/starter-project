@@ -27,6 +27,21 @@ Once you have completed this appropriately, you can start to work with the proje
 The Android launcher icons are already included in `android/app/src/main/res/mipmap-*`, so no icons need to be generated.
 (`flutter_launcher_icons` is not a dependency of this project.)
 
+### Running the app with the Firebase Local Emulator Suite
+The journalists' articles are stored in Firestore and their thumbnails in Cloud Storage. Since Cloud Storage requires
+the Blaze plan on a real Firebase project (see [backend/README.md](../backend/README.md)), the app connects to the
+**Firebase Local Emulator Suite by default**:
+1. Start the emulators from the `backend` folder: `npm run emulators` (the data is kept between runs).
+2. With the Android emulator (or a phone over USB) running: `npm run android:connect` (from the `backend` folder;
+   it runs `adb reverse` for Firestore and Storage). On the Android emulator, FlutterFire already reaches the
+   emulators of this computer, but this is still needed to load the thumbnails created by `npm run seed`
+   (their URLs point to 127.0.0.1); on a phone it is always needed. Run it again every time the device restarts.
+3. Run the app: `flutter run` (or `flutter run --release` to record videos: the debug build is slower).
+
+Options (`--dart-define`):
+- `USE_FIREBASE_EMULATORS=false`: use the real Firebase project instead of the emulators (Cloud Storage requires Blaze).
+- `FIREBASE_EMULATORS_HOST=<ip>`: reach emulators running on another computer of the network.
+
 ### How can I best understand this project?
 In order to best understand this project and its underlying intricacies, we recommend that you watch this tutorial: [Flutter Clean Architecture Tutorial](https://www.youtube.com/watch?v=7V_P6dovixg).
 This tutorial **literally builds this project from the ground up** so we really recommend you watch it before developing.

@@ -53,8 +53,14 @@ To run the application locally, use the following command:
 
 ```firebase emulators:start```
 
+To keep the data between runs, start them with the npm script instead: it loads the data saved in `emulator-data/`
+and saves it again when the emulators are stopped (`Ctrl+C`), so the articles published from the app are not lost:
+```
+npm run emulators
+```
+
 ### Seeding the emulator with sample articles
-The emulator starts empty. To create the `articles` collection with sample articles and their thumbnails in
+The first time, the emulator starts empty. To create the `articles` collection with sample articles and their thumbnails in
 `media/articles`, install the dependencies once and, with the emulators running, run the seed script in another terminal:
 ```
 npm install

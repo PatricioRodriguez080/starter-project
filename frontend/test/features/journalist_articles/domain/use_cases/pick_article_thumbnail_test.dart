@@ -1,22 +1,38 @@
+import 'dart:typed_data';
+
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:news_app_clean_architecture/core/resources/data_state.dart';
+import 'package:news_app_clean_architecture/features/journalist_articles/domain/entities/article_thumbnail.dart';
+import 'package:news_app_clean_architecture/features/journalist_articles/domain/repository/article_thumbnail_repository.dart';
 import 'package:news_app_clean_architecture/features/journalist_articles/domain/use_cases/pick_article_thumbnail.dart';
 
-void main() {
-  test('returns a thumbnail that follows the thumbnail rules', () async {
-    final dataState = await PickArticleThumbnailUseCase()();
+class MockArticleThumbnailRepository extends Mock implements ArticleThumbnailRepository {}
 
-    expect(dataState, isA<DataSuccess>());
-    final thumbnail = dataState.data!;
-    expect(thumbnail.bytes, isNotEmpty);
-    expect(thumbnail.hasAllowedExtension, isTrue);
-    expect(thumbnail.isWithinMaxSize, isTrue);
+void main() {
+  late MockArticleThumbnailRepository repository;
+  late PickArticleThumbnailUseCase pickArticleThumbnail;
+
+  setUp(() {
+    repository = MockArticleThumbnailRepository();
+    pickArticleThumbnail = PickArticleThumbnailUseCase(repository);
   });
 
-  test('returns a real PNG image', () async {
-    final thumbnail = (await PickArticleThumbnailUseCase()()).data!;
+  test('returns the thumbnail chosen in the gallery', () async {
+    final thumbnail = ArticleThumbnailEntity(bytes: Uint8List(1024), fileExtension: 'png');
+    when(() => repository.pickThumbnailFromGallery()).thenAnswer((_) async => DataSuccess(thumbnail));
 
-    const pngSignature = [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A];
-    expect(thumbnail.bytes.take(8), pngSignature);
+    final dataState = await pickArticleThumbnail();
+
+    expect(dataState.data, thumbnail);
+  });
+
+  test('returns no thumbnail when the gallery is closed without choosing one', () async {
+    when(() => repository.pickThumbnailFromGallery()).thenAnswer((_) async => const DataSuccess(null));
+
+    final dataState = await pickArticleThumbnail();
+
+    expect(dataState, isA<DataSuccess>());
+    expect(dataState.data, isNull);
   });
 }

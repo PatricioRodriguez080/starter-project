@@ -1,29 +1,48 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:news_app_clean_architecture/core/resources/data_state.dart';
+import 'package:news_app_clean_architecture/features/journalist_articles/domain/entities/journalist_article.dart';
+import 'package:news_app_clean_architecture/features/journalist_articles/domain/repository/journalist_article_repository.dart';
 import 'package:news_app_clean_architecture/features/journalist_articles/domain/use_cases/get_published_articles.dart';
 
+class MockJournalistArticleRepository extends Mock implements JournalistArticleRepository {}
+
 void main() {
+  late MockJournalistArticleRepository repository;
   late GetPublishedArticlesUseCase getPublishedArticles;
 
-  setUp(() => getPublishedArticles = GetPublishedArticlesUseCase());
+  setUp(() {
+    repository = MockJournalistArticleRepository();
+    getPublishedArticles = GetPublishedArticlesUseCase(repository);
+  });
 
-  test('returns the published articles', () async {
+  test('returns the published articles from the repository', () async {
+    final articles = [
+      JournalistArticleEntity(
+        id: 'article1',
+        title: 'Local startup brings clean water to 10,000 homes',
+        description: 'A team of engineers has designed a low-cost filter.',
+        content: 'When the first prototype was installed last spring...',
+        author: 'Jane Doe',
+        thumbnailURL: 'https://example.com/thumbnail.png',
+        publishedAt: DateTime.utc(2026, 9, 30),
+      ),
+    ];
+    when(() => repository.getPublishedArticles()).thenAnswer((_) async => DataSuccess(articles));
+
     final dataState = await getPublishedArticles();
 
     expect(dataState, isA<DataSuccess>());
-    expect(dataState.data, isNotEmpty);
+    expect(dataState.data, articles);
   });
 
-  test('returns articles that are shown in the app with every field filled in', () async {
-    final articles = (await getPublishedArticles()).data!;
+  test('returns the failure of the repository', () async {
+    final error = Exception('No connection');
+    when(() => repository.getPublishedArticles()).thenAnswer((_) async => DataFailed(error));
 
-    for (final article in articles) {
-      expect(article.id, isNotEmpty);
-      expect(article.title, isNotEmpty);
-      expect(article.description, isNotEmpty);
-      expect(article.content, isNotEmpty);
-      expect(article.author, isNotEmpty);
-      expect(Uri.parse(article.thumbnailURL).isAbsolute, isTrue);
-    }
+    final dataState = await getPublishedArticles();
+
+    expect(dataState, isA<DataFailed>());
+    expect(dataState.error, error);
   });
 }

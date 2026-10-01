@@ -1,12 +1,18 @@
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:news_app_clean_architecture/core/resources/data_state.dart';
 import 'package:news_app_clean_architecture/features/journalist_articles/domain/entities/article_draft.dart';
 import 'package:news_app_clean_architecture/features/journalist_articles/domain/entities/article_thumbnail.dart';
+import 'package:news_app_clean_architecture/features/journalist_articles/domain/entities/journalist_article.dart';
+import 'package:news_app_clean_architecture/features/journalist_articles/domain/repository/journalist_article_repository.dart';
 import 'package:news_app_clean_architecture/features/journalist_articles/domain/use_cases/publish_article.dart';
 
+class MockJournalistArticleRepository extends Mock implements JournalistArticleRepository {}
+
 void main() {
+  late MockJournalistArticleRepository repository;
   late PublishArticleUseCase publishArticle;
 
   final validDraft = ArticleDraftEntity(
@@ -17,31 +23,45 @@ void main() {
     thumbnail: ArticleThumbnailEntity(bytes: Uint8List(1024), fileExtension: 'jpg'),
   );
 
-  setUp(() => publishArticle = PublishArticleUseCase());
+  final publishedArticle = JournalistArticleEntity(
+    id: 'article1',
+    title: validDraft.title,
+    description: validDraft.description,
+    content: validDraft.content,
+    author: validDraft.author,
+    thumbnailURL: 'https://example.com/thumbnail.jpg',
+    publishedAt: DateTime.utc(2026, 9, 30),
+  );
 
-  test('publishes a valid draft keeping what the journalist wrote', () async {
+  setUpAll(() => registerFallbackValue(const ArticleDraftEntity()));
+
+  setUp(() {
+    repository = MockJournalistArticleRepository();
+    publishArticle = PublishArticleUseCase(repository);
+  });
+
+  test('publishes a valid draft through the repository', () async {
+    when(() => repository.publishArticle(validDraft))
+        .thenAnswer((_) async => DataSuccess(publishedArticle));
+
     final dataState = await publishArticle(params: validDraft);
 
     expect(dataState, isA<DataSuccess>());
-    final article = dataState.data!;
-    expect(article.id, isNotEmpty);
-    expect(article.title, validDraft.title);
-    expect(article.description, validDraft.description);
-    expect(article.content, validDraft.content);
-    expect(article.author, validDraft.author);
-    expect(Uri.parse(article.thumbnailURL).isAbsolute, isTrue);
+    expect(dataState.data, publishedArticle);
+    verify(() => repository.publishArticle(validDraft)).called(1);
   });
 
-  test('sets the publication date when the article is published', () async {
-    final before = DateTime.now().toUtc();
-    final article = (await publishArticle(params: validDraft)).data!;
-    final after = DateTime.now().toUtc();
+  test('returns the failure of the repository', () async {
+    final error = Exception('No connection');
+    when(() => repository.publishArticle(validDraft)).thenAnswer((_) async => DataFailed(error));
 
-    expect(article.publishedAt.isBefore(before), isFalse);
-    expect(article.publishedAt.isAfter(after), isFalse);
+    final dataState = await publishArticle(params: validDraft);
+
+    expect(dataState, isA<DataFailed>());
+    expect(dataState.error, error);
   });
 
-  test('refuses to publish a draft that breaks its rules', () async {
+  test('refuses to publish a draft that breaks its rules without reaching the repository', () async {
     const invalidDraft = ArticleDraftEntity(title: 'Only a title');
 
     final dataState = await publishArticle(params: invalidDraft);
@@ -49,5 +69,6 @@ void main() {
     expect(dataState, isA<DataFailed>());
     expect(dataState.error, isA<InvalidArticleDraftException>());
     expect((dataState.error! as InvalidArticleDraftException).draft, invalidDraft);
+    verifyNever(() => repository.publishArticle(any()));
   });
 }

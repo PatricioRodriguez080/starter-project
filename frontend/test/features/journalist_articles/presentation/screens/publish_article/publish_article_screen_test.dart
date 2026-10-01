@@ -1,13 +1,50 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:news_app_clean_architecture/core/resources/data_state.dart';
+import 'package:news_app_clean_architecture/features/journalist_articles/domain/entities/article_draft.dart';
+import 'package:news_app_clean_architecture/features/journalist_articles/domain/entities/article_thumbnail.dart';
 import 'package:news_app_clean_architecture/features/journalist_articles/domain/entities/journalist_article.dart';
+import 'package:news_app_clean_architecture/features/journalist_articles/domain/repository/article_thumbnail_repository.dart';
+import 'package:news_app_clean_architecture/features/journalist_articles/domain/repository/journalist_article_repository.dart';
 import 'package:news_app_clean_architecture/features/journalist_articles/domain/use_cases/pick_article_thumbnail.dart';
 import 'package:news_app_clean_architecture/features/journalist_articles/domain/use_cases/publish_article.dart';
 import 'package:news_app_clean_architecture/features/journalist_articles/presentation/bloc/publish_article/publish_article_cubit.dart';
 import 'package:news_app_clean_architecture/features/journalist_articles/presentation/screens/publish_article/publish_article_screen.dart';
 
-/// User journey "publish an article", with the real cubit and use cases (mock data, step 2.1).
+/// Publishes every article it receives, as Firestore and Cloud Storage would.
+class FakeJournalistArticleRepository implements JournalistArticleRepository {
+  @override
+  Future<DataState<List<JournalistArticleEntity>>> getPublishedArticles() async => const DataSuccess([]);
+
+  @override
+  Future<DataState<JournalistArticleEntity>> publishArticle(ArticleDraftEntity draft) async {
+    return DataSuccess(JournalistArticleEntity(
+      id: 'article1',
+      title: draft.title,
+      description: draft.description,
+      content: draft.content,
+      author: draft.author,
+      thumbnailURL: 'https://example.com/media%2Farticles%2Farticle1.png',
+      publishedAt: DateTime.utc(2026, 10, 1),
+    ));
+  }
+}
+
+/// Returns a 1x1 PNG, as if the journalist had chosen it in the gallery.
+class FakeArticleThumbnailRepository implements ArticleThumbnailRepository {
+  static const String _pngInBase64 =
+      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFBQIAX8jx0gAAAABJRU5ErkJggg==';
+
+  @override
+  Future<DataState<ArticleThumbnailEntity?>> pickThumbnailFromGallery() async {
+    return DataSuccess(ArticleThumbnailEntity(bytes: base64Decode(_pngInBase64), fileExtension: 'png'));
+  }
+}
+
+/// User journey "publish an article", with the real cubit and use cases and fake repositories.
 void main() {
   Object? closedWith;
 
@@ -23,7 +60,9 @@ void main() {
               MaterialPageRoute(
                 builder: (_) => BlocProvider(
                   create: (_) => PublishArticleCubit(
-                      PublishArticleUseCase(), PickArticleThumbnailUseCase()),
+                    PublishArticleUseCase(FakeJournalistArticleRepository()),
+                    PickArticleThumbnailUseCase(FakeArticleThumbnailRepository()),
+                  ),
                   child: const PublishArticleScreen(),
                 ),
               ),
