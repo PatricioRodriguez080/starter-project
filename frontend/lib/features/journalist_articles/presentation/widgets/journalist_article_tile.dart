@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:news_app_clean_architecture/config/theme/app_skeletons.dart';
 import 'package:news_app_clean_architecture/config/theme/app_themes.dart';
+import 'package:news_app_clean_architecture/config/theme/bookmark_button.dart';
 import 'package:news_app_clean_architecture/features/journalist_articles/domain/entities/journalist_article.dart';
 
 import 'comment_count.dart';
@@ -13,10 +14,14 @@ class JournalistArticleTile extends StatelessWidget {
   final JournalistArticleEntity article;
   final void Function(JournalistArticleEntity article) onPressed;
 
+  /// When given (in the saved articles), a filled bookmark removes the article from the list.
+  final void Function(JournalistArticleEntity article)? onRemove;
+
   const JournalistArticleTile({
     super.key,
     required this.article,
     required this.onPressed,
+    this.onRemove,
   });
 
   @override
@@ -34,6 +39,8 @@ class JournalistArticleTile extends StatelessWidget {
               _buildThumbnail(palette),
               const SizedBox(width: 14),
               Expanded(child: _buildTexts(palette)),
+              if (onRemove != null)
+                BookmarkButton(isSaved: true, onPressed: () => onRemove!(article), size: 22),
             ],
           ),
         ),

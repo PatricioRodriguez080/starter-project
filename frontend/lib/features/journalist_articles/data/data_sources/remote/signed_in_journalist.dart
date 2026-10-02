@@ -1,6 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 
-/// Thrown when trying to publish an article or a comment while nobody is signed in.
+/// Thrown when trying to publish, comment or save an article while nobody is signed in.
 class NoSignedInJournalistException implements Exception {
   const NoSignedInJournalistException();
 }
@@ -11,4 +11,11 @@ Map<String, dynamic> authorRawDataOfSignedInJournalist(FirebaseAuth auth) {
   final journalist = auth.currentUser;
   if (journalist == null) throw const NoSignedInJournalistException();
   return {'author': journalist.displayName ?? '', 'authorId': journalist.uid};
+}
+
+/// The uid of the signed-in account, which owns the journalist's lists (for example, the saved articles).
+String signedInJournalistId(FirebaseAuth auth) {
+  final journalist = auth.currentUser;
+  if (journalist == null) throw const NoSignedInJournalistException();
+  return journalist.uid;
 }

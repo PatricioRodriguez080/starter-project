@@ -5,6 +5,8 @@ import '../../features/auth/presentation/screens/profile/profile_screen.dart';
 import '../../features/daily_news/presentation/pages/home/daily_news.dart';
 import '../../features/daily_news/presentation/pages/saved_article/saved_article.dart';
 import '../../features/journalist_articles/presentation/bloc/published_articles/published_articles_cubit.dart';
+import '../../features/journalist_articles/presentation/bloc/saved_journalist_articles/saved_journalist_articles_cubit.dart';
+import '../../injection_container.dart';
 import '../../features/settings/presentation/screens/settings/settings_screen.dart';
 import 'app_bottom_navigation_bar.dart';
 
@@ -45,7 +47,11 @@ class _AppNavigationShellState extends State<AppNavigationShell> {
       case AppSection.home:
         return const DailyNews();
       case AppSection.saved:
-        return const SavedArticles();
+        // Created every time the section opens, so the saved articles are always up to date.
+        return BlocProvider<SavedJournalistArticlesCubit>(
+          create: (_) => sl()..loadSavedArticles(),
+          child: const SavedArticles(),
+        );
       case AppSection.profile:
         return const ProfileScreen();
       case AppSection.settings:

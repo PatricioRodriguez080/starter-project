@@ -7,10 +7,13 @@ import 'package:ionicons/ionicons.dart';
 import 'package:news_app_clean_architecture/config/theme/app_skeletons.dart';
 import 'package:news_app_clean_architecture/config/theme/app_themes.dart';
 import 'package:news_app_clean_architecture/config/theme/app_toasts.dart';
+import 'package:news_app_clean_architecture/config/theme/bookmark_button.dart';
 import 'package:news_app_clean_architecture/features/journalist_articles/domain/entities/journalist_article.dart';
 import 'package:news_app_clean_architecture/features/journalist_articles/presentation/bloc/add_article_comment/add_article_comment_cubit.dart';
 import 'package:news_app_clean_architecture/features/journalist_articles/presentation/bloc/add_article_comment/add_article_comment_state.dart';
 import 'package:news_app_clean_architecture/features/journalist_articles/presentation/bloc/article_comments/article_comments_cubit.dart';
+import 'package:news_app_clean_architecture/features/journalist_articles/presentation/bloc/journalist_article_bookmark/journalist_article_bookmark_cubit.dart';
+import 'package:news_app_clean_architecture/features/journalist_articles/presentation/bloc/journalist_article_bookmark/journalist_article_bookmark_state.dart';
 import 'package:news_app_clean_architecture/features/journalist_articles/presentation/widgets/article_comments_section.dart';
 import 'package:news_app_clean_architecture/features/journalist_articles/presentation/widgets/comment_composer.dart';
 import 'package:news_app_clean_architecture/features/journalist_articles/presentation/widgets/publication_date_text.dart';
@@ -52,6 +55,7 @@ class _JournalistArticleDetailScreenState extends State<JournalistArticleDetailS
           tooltip: 'Back',
           icon: const Icon(Ionicons.chevronBack),
         ),
+        actions: [_buildBookmark(), const SizedBox(width: 4)],
       ),
       body: BlocListener<AddArticleCommentCubit, AddArticleCommentState>(
         listener: _onCommentStateChanged,
@@ -79,6 +83,34 @@ class _JournalistArticleDetailScreenState extends State<JournalistArticleDetailS
         ],
       ),
     );
+  }
+
+  Widget _buildBookmark() {
+    return BlocConsumer<JournalistArticleBookmarkCubit, JournalistArticleBookmarkState>(
+      listenWhen: (previous, current) =>
+          current is JournalistArticleBookmarkChanged || current is JournalistArticleBookmarkFailure,
+      listener: _onBookmarkChanged,
+      builder: (context, state) => BookmarkButton(
+        isSaved: state.isSaved,
+        onPressed: state is JournalistArticleBookmarkInProgress
+            ? null
+            : context.read<JournalistArticleBookmarkCubit>().toggleBookmark,
+      ),
+    );
+  }
+
+  void _onBookmarkChanged(BuildContext context, JournalistArticleBookmarkState state) {
+    if (state is JournalistArticleBookmarkFailure) {
+      showAppToast(
+        context,
+        const AppToast.error('Your saved articles could not be updated', description: 'Please try again.'),
+      );
+      return;
+    }
+    final toast = state.isSaved
+        ? const AppToast.success('Article saved', description: 'Find it in Saved, in the Journalists tab.')
+        : const AppToast.info('Removed from saved');
+    showAppToast(context, toast);
   }
 
   void _onCommentStateChanged(BuildContext context, AddArticleCommentState state) {

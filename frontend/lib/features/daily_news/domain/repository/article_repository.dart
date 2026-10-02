@@ -10,5 +10,7 @@ abstract class ArticleRepository {
 
   Future < void > saveArticle(ArticleEntity article);
 
+  Future<DataState<bool>> isArticleSaved(ArticleEntity article);
+
   Future < void > removeArticle(ArticleEntity article);
 }

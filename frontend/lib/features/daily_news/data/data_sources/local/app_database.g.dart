@@ -168,6 +168,27 @@ class _$ArticleDao extends ArticleDao {
   }
 
   @override
+  Future<ArticleModel?> findArticleByUrl(String url) async {
+    return _queryAdapter.query('SELECT * FROM article WHERE url = ?1',
+        mapper: (Map<String, Object?> row) => ArticleModel(
+            id: row['id'] as int?,
+            author: row['author'] as String?,
+            title: row['title'] as String?,
+            description: row['description'] as String?,
+            url: row['url'] as String?,
+            urlToImage: row['urlToImage'] as String?,
+            publishedAt: row['publishedAt'] as String?,
+            content: row['content'] as String?),
+        arguments: [url]);
+  }
+
+  @override
+  Future<void> deleteArticleByUrl(String url) async {
+    await _queryAdapter
+        .queryNoReturn('DELETE FROM article WHERE url = ?1', arguments: [url]);
+  }
+
+  @override
   Future<void> insertArticle(ArticleModel article) async {
     await _articleModelInsertionAdapter.insert(
         article, OnConflictStrategy.abort);

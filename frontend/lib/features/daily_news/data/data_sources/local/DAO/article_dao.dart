@@ -12,4 +12,11 @@ abstract class ArticleDao {
   
   @Query('SELECT * FROM article')
   Future<List<ArticleModel>> getArticles();
+
+  /// A NewsAPI article is identified by its URL: it has no ID until it is saved here.
+  @Query('SELECT * FROM article WHERE url = :url')
+  Future<ArticleModel?> findArticleByUrl(String url);
+
+  @Query('DELETE FROM article WHERE url = :url')
+  Future<void> deleteArticleByUrl(String url);
 }

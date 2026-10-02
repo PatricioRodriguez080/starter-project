@@ -32,14 +32,30 @@ class ArticleRepositoryImpl implements ArticleRepository {
     return _appDatabase.articleDAO.getArticles();
   }
 
+  /// Removed by its URL, so it also works for an article that comes from NewsAPI (without a local ID).
   @override
   Future<void> removeArticle(ArticleEntity article) {
-    return _appDatabase.articleDAO.deleteArticle(ArticleModel.fromEntity(article));
+    final url = article.url;
+    if (url == null) return _appDatabase.articleDAO.deleteArticle(ArticleModel.fromEntity(article));
+    return _appDatabase.articleDAO.deleteArticleByUrl(url);
+  }
+
+  /// An article that is already saved is not saved again.
+  @override
+  Future<void> saveArticle(ArticleEntity article) async {
+    final url = article.url;
+    if (url != null && await _appDatabase.articleDAO.findArticleByUrl(url) != null) return;
+    await _appDatabase.articleDAO.insertArticle(ArticleModel.fromEntity(article));
   }
 
   @override
-  Future<void> saveArticle(ArticleEntity article) {
-    return _appDatabase.articleDAO.insertArticle(ArticleModel.fromEntity(article));
+  Future<DataState<bool>> isArticleSaved(ArticleEntity article) async {
+    try {
+      final savedArticle = await _appDatabase.articleDAO.findArticleByUrl(article.url ?? '');
+      return DataSuccess(savedArticle != null);
+    } on Exception catch (error) {
+      return DataFailed(error);
+    }
   }
-  
+
 }

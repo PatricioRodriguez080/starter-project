@@ -5,10 +5,10 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:ionicons/ionicons.dart';
 import '../../../../../config/theme/app_skeletons.dart';
 import '../../../../../config/theme/app_toasts.dart';
-import '../../../../../injection_container.dart';
+import '../../../../../config/theme/bookmark_button.dart';
 import '../../../domain/entities/article.dart';
-import '../../bloc/article/local/local_article_bloc.dart';
-import '../../bloc/article/local/local_article_event.dart';
+import '../../bloc/article/bookmark/article_bookmark_cubit.dart';
+import '../../bloc/article/bookmark/article_bookmark_state.dart';
 
 class ArticleDetailsView extends HookWidget {
   final ArticleEntity? article;
@@ -17,13 +17,9 @@ class ArticleDetailsView extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => sl<LocalArticleBloc>(),
-      child: Scaffold(
-        appBar: _buildAppBar(),
-        body: _buildBody(),
-        floatingActionButton: _buildFloatingActionButton(),
-      ),
+    return Scaffold(
+      appBar: _buildAppBar(),
+      body: _buildBody(),
     );
   }
 
@@ -36,7 +32,26 @@ class ArticleDetailsView extends HookWidget {
           child: const Icon(Ionicons.chevronBack),
         ),
       ),
+      actions: [_buildBookmark(), const SizedBox(width: 4)],
     );
+  }
+
+  Widget _buildBookmark() {
+    return BlocConsumer<ArticleBookmarkCubit, ArticleBookmarkState>(
+      listener: _onBookmarkChanged,
+      listenWhen: (previous, current) => current is ArticleBookmarkChanged,
+      builder: (context, state) => BookmarkButton(
+        isSaved: state.isSaved,
+        onPressed: state is ArticleBookmarkInProgress ? null : context.read<ArticleBookmarkCubit>().toggleBookmark,
+      ),
+    );
+  }
+
+  void _onBookmarkChanged(BuildContext context, ArticleBookmarkState state) {
+    final toast = state.isSaved
+        ? const AppToast.success('Article saved', description: 'Find it in Saved.')
+        : const AppToast.info('Removed from saved');
+    showAppToast(context, toast);
   }
 
   Widget _buildBody() {
@@ -107,21 +122,8 @@ class ArticleDetailsView extends HookWidget {
     );
   }
 
-  Widget _buildFloatingActionButton() {
-    return Builder(
-      builder: (context) => FloatingActionButton(
-        onPressed: () => _onFloatingActionButtonPressed(context),
-        child: const Icon(Ionicons.bookmark),
-      ),
-    );
-  }
-
   void _onBackButtonTapped(BuildContext context) {
     Navigator.pop(context);
   }
 
-  void _onFloatingActionButtonPressed(BuildContext context) {
-    BlocProvider.of<LocalArticleBloc>(context).add(SaveArticle(article!));
-    showAppToast(context, const AppToast.success('Article saved', description: 'Find it in Saved.'));
-  }
 }

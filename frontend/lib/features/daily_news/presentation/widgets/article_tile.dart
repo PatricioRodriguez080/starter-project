@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 
 import '../../../../config/theme/app_skeletons.dart';
 import '../../../../config/theme/app_themes.dart';
+import '../../../../config/theme/bookmark_button.dart';
 import '../../domain/entities/article.dart';
 
 class ArticleWidget extends StatelessWidget {
@@ -37,7 +38,7 @@ class ArticleWidget extends StatelessWidget {
               _buildImage(palette),
               const SizedBox(width: 14),
               Expanded(child: _buildTitleAndDescription(palette)),
-              _buildRemovableArea(palette),
+              _buildRemovableArea(),
             ],
           ),
         ),
@@ -99,13 +100,9 @@ class ArticleWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildRemovableArea(AppPalette palette) {
+  Widget _buildRemovableArea() {
     if (!isRemovable!) return const SizedBox.shrink();
-    return IconButton(
-      onPressed: _onRemove,
-      tooltip: 'Remove from saved',
-      icon: Icon(Icons.remove_circle_outline, color: palette.error),
-    );
+    return BookmarkButton(isSaved: true, onPressed: _onRemove, size: 22);
   }
 
   /// NewsAPI dates are ISO strings ("2026-09-29T18:00:00Z"); anything else is shown as it comes.

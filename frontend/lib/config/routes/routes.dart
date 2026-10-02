@@ -6,10 +6,12 @@ import '../../features/auth/presentation/bloc/sign_in/sign_in_cubit.dart';
 import '../../features/auth/presentation/screens/register/register_screen.dart';
 import '../../features/auth/presentation/screens/sign_in/sign_in_screen.dart';
 import '../../features/daily_news/domain/entities/article.dart';
+import '../../features/daily_news/presentation/bloc/article/bookmark/article_bookmark_cubit.dart';
 import '../../features/daily_news/presentation/pages/article_detail/article_detail.dart';
 import '../../features/journalist_articles/domain/entities/journalist_article.dart';
 import '../../features/journalist_articles/presentation/bloc/add_article_comment/add_article_comment_cubit.dart';
 import '../../features/journalist_articles/presentation/bloc/article_comments/article_comments_cubit.dart';
+import '../../features/journalist_articles/presentation/bloc/journalist_article_bookmark/journalist_article_bookmark_cubit.dart';
 import '../../features/journalist_articles/presentation/bloc/publish_article/publish_article_cubit.dart';
 import '../../features/journalist_articles/presentation/screens/journalist_article_detail/journalist_article_detail_screen.dart';
 import '../../features/journalist_articles/presentation/screens/publish_article/publish_article_screen.dart';
@@ -35,7 +37,7 @@ class AppRoutes {
         ));
 
       case '/ArticleDetails':
-        return _materialRoute(ArticleDetailsView(article: settings.arguments as ArticleEntity));
+        return _materialRoute(_buildArticleDetails(settings.arguments as ArticleEntity));
 
       case '/PublishArticle':
         return _materialRoute(BlocProvider(
@@ -51,11 +53,19 @@ class AppRoutes {
     }
   }
 
+  static Widget _buildArticleDetails(ArticleEntity article) {
+    return BlocProvider(
+      create: (_) => sl<ArticleBookmarkCubit>(param1: article)..loadBookmark(),
+      child: ArticleDetailsView(article: article),
+    );
+  }
+
   static Widget _buildJournalistArticleDetails(JournalistArticleEntity article) {
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (_) => sl<ArticleCommentsCubit>(param1: article.id)..loadComments()),
         BlocProvider(create: (_) => sl<AddArticleCommentCubit>(param1: article.id)),
+        BlocProvider(create: (_) => sl<JournalistArticleBookmarkCubit>(param1: article.id)..loadBookmark()),
       ],
       child: JournalistArticleDetailScreen(article: article),
     );

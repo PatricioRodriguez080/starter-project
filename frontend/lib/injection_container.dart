@@ -16,29 +16,41 @@ import 'features/auth/presentation/bloc/register/register_cubit.dart';
 import 'features/auth/presentation/bloc/session/session_cubit.dart';
 import 'features/auth/presentation/bloc/sign_in/sign_in_cubit.dart';
 import 'features/daily_news/data/data_sources/local/app_database.dart';
+import 'features/daily_news/domain/entities/article.dart';
 import 'features/daily_news/domain/usecases/get_saved_article.dart';
+import 'features/daily_news/domain/usecases/is_article_saved.dart';
 import 'features/daily_news/domain/usecases/remove_article.dart';
 import 'features/daily_news/domain/usecases/save_article.dart';
+import 'features/daily_news/presentation/bloc/article/bookmark/article_bookmark_cubit.dart';
 import 'features/daily_news/presentation/bloc/article/local/local_article_bloc.dart';
 import 'features/journalist_articles/data/data_sources/local/article_thumbnail_gallery_data_source.dart';
 import 'features/journalist_articles/data/data_sources/remote/article_comment_remote_data_source.dart';
 import 'features/journalist_articles/data/data_sources/remote/article_thumbnail_remote_data_source.dart';
 import 'features/journalist_articles/data/data_sources/remote/journalist_article_remote_data_source.dart';
+import 'features/journalist_articles/data/data_sources/remote/saved_journalist_article_remote_data_source.dart';
 import 'features/journalist_articles/data/repository/article_comment_repository_impl.dart';
 import 'features/journalist_articles/data/repository/article_thumbnail_repository_impl.dart';
 import 'features/journalist_articles/data/repository/journalist_article_repository_impl.dart';
+import 'features/journalist_articles/data/repository/saved_journalist_article_repository_impl.dart';
 import 'features/journalist_articles/domain/repository/article_comment_repository.dart';
 import 'features/journalist_articles/domain/repository/article_thumbnail_repository.dart';
 import 'features/journalist_articles/domain/repository/journalist_article_repository.dart';
+import 'features/journalist_articles/domain/repository/saved_journalist_article_repository.dart';
 import 'features/journalist_articles/domain/use_cases/add_article_comment.dart';
 import 'features/journalist_articles/domain/use_cases/get_article_comments.dart';
 import 'features/journalist_articles/domain/use_cases/get_published_articles.dart';
+import 'features/journalist_articles/domain/use_cases/get_saved_journalist_articles.dart';
+import 'features/journalist_articles/domain/use_cases/is_journalist_article_saved.dart';
 import 'features/journalist_articles/domain/use_cases/pick_article_thumbnail.dart';
 import 'features/journalist_articles/domain/use_cases/publish_article.dart';
+import 'features/journalist_articles/domain/use_cases/remove_saved_journalist_article.dart';
+import 'features/journalist_articles/domain/use_cases/save_journalist_article.dart';
 import 'features/journalist_articles/presentation/bloc/add_article_comment/add_article_comment_cubit.dart';
 import 'features/journalist_articles/presentation/bloc/article_comments/article_comments_cubit.dart';
+import 'features/journalist_articles/presentation/bloc/journalist_article_bookmark/journalist_article_bookmark_cubit.dart';
 import 'features/journalist_articles/presentation/bloc/publish_article/publish_article_cubit.dart';
 import 'features/journalist_articles/presentation/bloc/published_articles/published_articles_cubit.dart';
+import 'features/journalist_articles/presentation/bloc/saved_journalist_articles/saved_journalist_articles_cubit.dart';
 import 'features/settings/data/data_sources/local/settings_local_data_source.dart';
 import 'features/settings/data/repository/settings_repository_impl.dart';
 import 'features/settings/domain/repository/settings_repository.dart';
@@ -81,6 +93,10 @@ Future<void> initializeDependencies() async {
     RemoveArticleUseCase(sl())
   );
 
+  sl.registerSingleton<IsArticleSavedUseCase>(
+    IsArticleSavedUseCase(sl())
+  );
+
 
   //Blocs
   sl.registerFactory<RemoteArticlesBloc>(
@@ -89,6 +105,11 @@ Future<void> initializeDependencies() async {
 
   sl.registerFactory<LocalArticleBloc>(
     ()=> LocalArticleBloc(sl(),sl(),sl())
+  );
+
+  // Created for each news article, which is its parameter.
+  sl.registerFactoryParam<ArticleBookmarkCubit, ArticleEntity, void>(
+    (article, _) => ArticleBookmarkCubit(sl(), sl(), sl(), article),
   );
 
   // Before any Firebase request, so every feature talks to the same backend.
@@ -126,11 +147,13 @@ void _initializeJournalistArticlesDependencies() {
   sl.registerSingleton<ArticleThumbnailRemoteDataSource>(ArticleThumbnailRemoteDataSourceImpl());
   sl.registerSingleton<ArticleThumbnailGalleryDataSource>(ArticleThumbnailGalleryDataSourceImpl());
   sl.registerSingleton<ArticleCommentRemoteDataSource>(ArticleCommentRemoteDataSourceImpl());
+  sl.registerSingleton<SavedJournalistArticleRemoteDataSource>(SavedJournalistArticleRemoteDataSourceImpl());
 
   //Repositories
   sl.registerSingleton<JournalistArticleRepository>(JournalistArticleRepositoryImpl(sl(), sl()));
   sl.registerSingleton<ArticleThumbnailRepository>(ArticleThumbnailRepositoryImpl(sl()));
   sl.registerSingleton<ArticleCommentRepository>(ArticleCommentRepositoryImpl(sl()));
+  sl.registerSingleton<SavedJournalistArticleRepository>(SavedJournalistArticleRepositoryImpl(sl(), sl()));
 
   //UseCases
   sl.registerSingleton<GetPublishedArticlesUseCase>(GetPublishedArticlesUseCase(sl()));
@@ -138,6 +161,10 @@ void _initializeJournalistArticlesDependencies() {
   sl.registerSingleton<PickArticleThumbnailUseCase>(PickArticleThumbnailUseCase(sl()));
   sl.registerSingleton<GetArticleCommentsUseCase>(GetArticleCommentsUseCase(sl()));
   sl.registerSingleton<AddArticleCommentUseCase>(AddArticleCommentUseCase(sl()));
+  sl.registerSingleton<GetSavedJournalistArticlesUseCase>(GetSavedJournalistArticlesUseCase(sl()));
+  sl.registerSingleton<IsJournalistArticleSavedUseCase>(IsJournalistArticleSavedUseCase(sl()));
+  sl.registerSingleton<SaveJournalistArticleUseCase>(SaveJournalistArticleUseCase(sl()));
+  sl.registerSingleton<RemoveSavedJournalistArticleUseCase>(RemoveSavedJournalistArticleUseCase(sl()));
 
   //Cubits
   sl.registerFactory<PublishedArticlesCubit>(() => PublishedArticlesCubit(sl()));
@@ -147,4 +174,8 @@ void _initializeJournalistArticlesDependencies() {
   sl.registerFactoryParam<AddArticleCommentCubit, String, void>(
     (articleId, _) => AddArticleCommentCubit(sl(), articleId),
   );
+  sl.registerFactoryParam<JournalistArticleBookmarkCubit, String, void>(
+    (articleId, _) => JournalistArticleBookmarkCubit(sl(), sl(), sl(), articleId),
+  );
+  sl.registerFactory<SavedJournalistArticlesCubit>(() => SavedJournalistArticlesCubit(sl(), sl()));
 }

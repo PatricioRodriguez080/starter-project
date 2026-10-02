@@ -17,9 +17,14 @@ class PublicationDateText extends StatelessWidget {
       children: [
         Icon(Icons.schedule, size: 14, color: palette.textSecondary),
         const SizedBox(width: 4),
-        Text(
-          formatPublicationDate(publishedAt),
-          style: TextStyle(fontSize: 12, color: palette.textSecondary),
+        // Cut with an ellipsis instead of overflowing in narrow tiles or with large text sizes.
+        Flexible(
+          child: Text(
+            formatPublicationDate(publishedAt),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(fontSize: 12, color: palette.textSecondary),
+          ),
         ),
       ],
     );

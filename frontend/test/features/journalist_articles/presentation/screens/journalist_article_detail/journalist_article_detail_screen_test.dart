@@ -7,10 +7,15 @@ import 'package:news_app_clean_architecture/features/journalist_articles/domain/
 import 'package:news_app_clean_architecture/features/journalist_articles/domain/entities/article_comment_draft.dart';
 import 'package:news_app_clean_architecture/features/journalist_articles/domain/entities/journalist_article.dart';
 import 'package:news_app_clean_architecture/features/journalist_articles/domain/repository/article_comment_repository.dart';
+import 'package:news_app_clean_architecture/features/journalist_articles/domain/repository/saved_journalist_article_repository.dart';
 import 'package:news_app_clean_architecture/features/journalist_articles/domain/use_cases/add_article_comment.dart';
 import 'package:news_app_clean_architecture/features/journalist_articles/domain/use_cases/get_article_comments.dart';
+import 'package:news_app_clean_architecture/features/journalist_articles/domain/use_cases/is_journalist_article_saved.dart';
+import 'package:news_app_clean_architecture/features/journalist_articles/domain/use_cases/remove_saved_journalist_article.dart';
+import 'package:news_app_clean_architecture/features/journalist_articles/domain/use_cases/save_journalist_article.dart';
 import 'package:news_app_clean_architecture/features/journalist_articles/presentation/bloc/add_article_comment/add_article_comment_cubit.dart';
 import 'package:news_app_clean_architecture/features/journalist_articles/presentation/bloc/article_comments/article_comments_cubit.dart';
+import 'package:news_app_clean_architecture/features/journalist_articles/presentation/bloc/journalist_article_bookmark/journalist_article_bookmark_cubit.dart';
 import 'package:news_app_clean_architecture/features/journalist_articles/presentation/screens/journalist_article_detail/journalist_article_detail_screen.dart';
 
 /// Keeps the comments in memory and writes them in the name of Jane Doe, as Firestore would for her account.
@@ -38,7 +43,33 @@ class FakeArticleCommentRepository implements ArticleCommentRepository {
   }
 }
 
-/// User journey "comment on an article", with the real cubits and use cases and a fake repository.
+/// Keeps the IDs of the saved articles in memory, as the journalist's list in Firestore would.
+class FakeSavedJournalistArticleRepository implements SavedJournalistArticleRepository {
+  final Set<String> savedArticleIds = {};
+  bool failsToChange = false;
+
+  @override
+  Future<DataState<bool>> isArticleSaved(String articleId) async => DataSuccess(savedArticleIds.contains(articleId));
+
+  @override
+  Future<DataState<void>> saveArticle(String articleId) async {
+    if (failsToChange) return DataFailed(Exception('No connection'));
+    savedArticleIds.add(articleId);
+    return const DataSuccess(null);
+  }
+
+  @override
+  Future<DataState<void>> removeSavedArticle(String articleId) async {
+    savedArticleIds.remove(articleId);
+    return const DataSuccess(null);
+  }
+
+  @override
+  Future<DataState<List<JournalistArticleEntity>>> getSavedArticles() => throw UnimplementedError();
+}
+
+/// User journeys "comment on an article" and "save an article", with the real cubits and use cases and fake
+/// repositories.
 void main() {
   final article = JournalistArticleEntity(
     id: 'article1',
@@ -59,9 +90,11 @@ void main() {
   );
 
   late FakeArticleCommentRepository repository;
+  late FakeSavedJournalistArticleRepository savedArticles;
 
   Future<void> openArticle(WidgetTester tester, {List<ArticleCommentEntity> comments = const []}) async {
     repository = FakeArticleCommentRepository([...comments]);
+    savedArticles = FakeSavedJournalistArticleRepository();
     // Screen of the Pixel 8 used as Android emulator (412 x 914 logical pixels).
     tester.view.physicalSize = const Size(1080, 2400);
     tester.view.devicePixelRatio = 2.625;
@@ -74,6 +107,14 @@ void main() {
             create: (_) => ArticleCommentsCubit(GetArticleCommentsUseCase(repository), article.id)..loadComments(),
           ),
           BlocProvider(create: (_) => AddArticleCommentCubit(AddArticleCommentUseCase(repository), article.id)),
+          BlocProvider(
+            create: (_) => JournalistArticleBookmarkCubit(
+              IsJournalistArticleSavedUseCase(savedArticles),
+              SaveJournalistArticleUseCase(savedArticles),
+              RemoveSavedJournalistArticleUseCase(savedArticles),
+              article.id,
+            )..loadBookmark(),
+          ),
         ],
         child: JournalistArticleDetailScreen(article: article),
       ),
@@ -149,5 +190,43 @@ void main() {
     // The toast closes by itself after a few seconds.
     await tester.pump(const Duration(seconds: 5));
     await tester.pumpAndSettle();
+  });
+
+  Future<void> waitForTheToastToClose(WidgetTester tester) async {
+    await tester.pump(const Duration(seconds: 5));
+    await tester.pumpAndSettle();
+  }
+
+  testWidgets('saves the article and removes it again with the bookmark', (tester) async {
+    await openArticle(tester);
+    expect(find.byTooltip('Save article'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Save article'));
+    await tester.pumpAndSettle();
+
+    expect(savedArticles.savedArticleIds, {article.id});
+    expect(find.byTooltip('Remove from saved'), findsOneWidget);
+    expect(find.text('Article saved'), findsOneWidget);
+    await waitForTheToastToClose(tester);
+
+    await tester.tap(find.byTooltip('Remove from saved'));
+    await tester.pumpAndSettle();
+
+    expect(savedArticles.savedArticleIds, isEmpty);
+    expect(find.byTooltip('Save article'), findsOneWidget);
+    expect(find.text('Removed from saved'), findsOneWidget);
+    await waitForTheToastToClose(tester);
+  });
+
+  testWidgets('keeps the bookmark as it was and tells the journalist when it cannot be saved', (tester) async {
+    await openArticle(tester);
+    savedArticles.failsToChange = true;
+
+    await tester.tap(find.byTooltip('Save article'));
+    await tester.pumpAndSettle();
+
+    expect(find.byTooltip('Save article'), findsOneWidget);
+    expect(find.text('Your saved articles could not be updated'), findsOneWidget);
+    await waitForTheToastToClose(tester);
   });
 }

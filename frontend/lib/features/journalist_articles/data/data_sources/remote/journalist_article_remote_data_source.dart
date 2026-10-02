@@ -7,6 +7,10 @@ abstract class JournalistArticleRemoteDataSource {
   /// Published articles, newest first, each one with the number of comments it has.
   Future<List<JournalistArticleModel>> getPublishedArticles();
 
+  /// The articles with the given IDs, in the same order, each one with the number of comments it has.
+  /// IDs of articles that do not exist are skipped.
+  Future<List<JournalistArticleModel>> getArticles(List<String> articleIds);
+
   /// Generates the ID of a new article without creating it, so its thumbnail can be named after it.
   String generateArticleId();
 
@@ -33,6 +37,12 @@ class JournalistArticleRemoteDataSourceImpl implements JournalistArticleRemoteDa
   Future<List<JournalistArticleModel>> getPublishedArticles() async {
     final snapshot = await _articles.orderBy('publishedAt', descending: true).get();
     return Future.wait(snapshot.docs.map(_toModelWithCommentCount));
+  }
+
+  @override
+  Future<List<JournalistArticleModel>> getArticles(List<String> articleIds) async {
+    final snapshots = await Future.wait(articleIds.map((articleId) => _articles.doc(articleId).get()));
+    return Future.wait(snapshots.where((snapshot) => snapshot.exists).map(_toModelWithCommentCount));
   }
 
   @override
