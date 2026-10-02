@@ -7,9 +7,12 @@ import {
 } from '@firebase/rules-unit-testing';
 import {
   Timestamp,
+  collection,
   deleteDoc,
   doc,
+  getCountFromServer,
   getDoc,
+  getDocs,
   serverTimestamp,
   setDoc,
   updateDoc,
@@ -17,6 +20,7 @@ import {
 
 const PROJECT_ID = 'demo-symmetry-news';
 const ARTICLE_ID = 'Xy7Qp2LmT9aB3cD4eF5g';
+const COMMENT_ID = 'Cm4Rt8NpQ2wE6yU1iO3a';
 const STORAGE_BUCKET = 'symmetry-news-1d028.firebasestorage.app';
 const AUTHOR_ID = 'janeDoeUid';
 const AUTHOR_NAME = 'Jane Doe';
@@ -62,6 +66,31 @@ async function seedArticleBypassingRules() {
   await testEnvironment.withSecurityRulesDisabled(async (context) => {
     const articleWithFixedDate = buildValidArticle({ publishedAt: Timestamp.now() });
     await setDoc(doc(context.firestore(), 'articles', ARTICLE_ID), articleWithFixedDate);
+  });
+}
+
+function buildValidComment(overrides = {}) {
+  return {
+    content: 'Great news for the rural towns. Will the filters reach the north too?',
+    author: AUTHOR_NAME,
+    authorId: AUTHOR_ID,
+    createdAt: serverTimestamp(),
+    ...overrides,
+  };
+}
+
+function commentsOf(firestore, articleId = ARTICLE_ID) {
+  return collection(firestore, 'articles', articleId, 'comments');
+}
+
+function createComment(comment, { firestore = database, articleId = ARTICLE_ID, commentId = COMMENT_ID } = {}) {
+  return setDoc(doc(commentsOf(firestore, articleId), commentId), comment);
+}
+
+async function seedCommentBypassingRules() {
+  await testEnvironment.withSecurityRulesDisabled(async (context) => {
+    const commentWithFixedDate = buildValidComment({ createdAt: Timestamp.now() });
+    await setDoc(doc(commentsOf(context.firestore()), COMMENT_ID), commentWithFixedDate);
   });
 }
 
@@ -195,6 +224,99 @@ describe('articles: update and delete', () => {
   test('rejects deleting an article', async () => {
     await seedArticleBypassingRules();
     await assertFails(deleteDoc(doc(database, 'articles', ARTICLE_ID)));
+  });
+});
+
+describe('comments: read', () => {
+  beforeEach(async () => {
+    await seedArticleBypassingRules();
+    await seedCommentBypassingRules();
+  });
+
+  test('a signed-in user can read the comments of an article', async () => {
+    await assertSucceeds(getDocs(commentsOf(database)));
+  });
+
+  test('a signed-in user can count the comments of an article', async () => {
+    await assertSucceeds(getCountFromServer(commentsOf(database)));
+  });
+
+  test('rejects reading or counting comments without signing in', async () => {
+    await assertFails(getDocs(commentsOf(anonymousDatabase)));
+    await assertFails(getCountFromServer(commentsOf(anonymousDatabase)));
+  });
+});
+
+describe('comments: create', () => {
+  beforeEach(() => seedArticleBypassingRules());
+
+  test('accepts a comment that follows the schema', async () => {
+    await assertSucceeds(createComment(buildValidComment()));
+  });
+
+  test('rejects commenting without signing in', async () => {
+    await assertFails(createComment(buildValidComment(), { firestore: anonymousDatabase }));
+  });
+
+  test('rejects a comment on an article that does not exist', async () => {
+    await assertFails(createComment(buildValidComment(), { articleId: 'MissingArticleId123' }));
+  });
+
+  test('rejects a comment written in the name of another account', async () => {
+    await assertFails(createComment(buildValidComment({ authorId: 'someoneElseUid' })));
+  });
+
+  test('rejects an author name that is not the name of the account', async () => {
+    await assertFails(createComment(buildValidComment({ author: 'John Smith' })));
+  });
+
+  for (const field of ['content', 'author', 'authorId', 'createdAt']) {
+    test(`rejects a comment without ${field}`, async () => {
+      const comment = buildValidComment();
+      delete comment[field];
+      await assertFails(createComment(comment));
+    });
+  }
+
+  test('rejects a comment with fields outside the schema', async () => {
+    await assertFails(createComment(buildValidComment({ likes: 3 })));
+  });
+
+  test('rejects a comment whose id is not alphanumeric', async () => {
+    await assertFails(createComment(buildValidComment(), { commentId: 'not.a-valid_id' }));
+  });
+
+  test('accepts a comment of exactly 1000 characters', async () => {
+    await assertSucceeds(createComment(buildValidComment({ content: 'a'.repeat(1000) })));
+  });
+
+  test('rejects a comment longer than 1000 characters', async () => {
+    await assertFails(createComment(buildValidComment({ content: 'a'.repeat(1001) })));
+  });
+
+  for (const [description, content] of [['an empty', ''], ['a whitespace-only', ' \n\t '], ['a non-string', 42]]) {
+    test(`rejects ${description} comment`, async () => {
+      await assertFails(createComment(buildValidComment({ content })));
+    });
+  }
+
+  test('rejects a comment date chosen by the client', async () => {
+    await assertFails(createComment(buildValidComment({ createdAt: Timestamp.now() })));
+  });
+});
+
+describe('comments: update and delete', () => {
+  beforeEach(async () => {
+    await seedArticleBypassingRules();
+    await seedCommentBypassingRules();
+  });
+
+  test('rejects updating a comment', async () => {
+    await assertFails(updateDoc(doc(commentsOf(database), COMMENT_ID), { content: 'Edited' }));
+  });
+
+  test('rejects deleting a comment', async () => {
+    await assertFails(deleteDoc(doc(commentsOf(database), COMMENT_ID)));
   });
 });
 

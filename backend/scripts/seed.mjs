@@ -1,5 +1,5 @@
-// Creates the demo journalist accounts and the `articles` collection, with its thumbnails, in the
-// Firebase Local Emulator Suite. Each article is published by its author's account and every write goes
+// Creates the demo journalist accounts and the `articles` collection, with its thumbnails and comments, in the
+// Firebase Local Emulator Suite. Each article and comment is written by its author's account and every write goes
 // through firestore.rules and storage.rules, so the seed data always follows the schema.
 //
 // Usage: start the emulators (`npm run emulators`) and, in another terminal, run `npm run seed`.
@@ -15,6 +15,7 @@ import {
   updateProfile,
 } from 'firebase/auth';
 import {
+  addDoc,
   collection,
   connectFirestoreEmulator,
   doc,
@@ -123,8 +124,24 @@ async function signInAs(auth, { name, email, password }) {
   return auth.currentUser;
 }
 
-async function seedArticle({ auth, firestore, storage }, users, { thumbnailColors, author, ...article }) {
-  const journalist = await signInAs(auth, users.find((user) => user.name === author));
+async function signInAsAuthor(auth, users, authorName) {
+  return signInAs(auth, users.find((user) => user.name === authorName));
+}
+
+async function seedComment({ auth, firestore }, users, articleId, { author, content }) {
+  const journalist = await signInAsAuthor(auth, users, author);
+  await addDoc(collection(firestore, 'articles', articleId, 'comments'), {
+    content,
+    author: journalist.displayName,
+    authorId: journalist.uid,
+    createdAt: serverTimestamp(),
+  });
+  console.log(`  ✔ comment by ${journalist.displayName}`);
+}
+
+async function seedArticle(services, users, { thumbnailColors, author, comments, ...article }) {
+  const { auth, firestore, storage } = services;
+  const journalist = await signInAsAuthor(auth, users, author);
   const articleRef = doc(collection(firestore, 'articles'));
   const thumbnailURL = await uploadThumbnail(storage, articleRef.id, thumbnailColors);
   await setDoc(articleRef, {
@@ -135,6 +152,10 @@ async function seedArticle({ auth, firestore, storage }, users, { thumbnailColor
     publishedAt: serverTimestamp(),
   });
   console.log(`✔ articles/${articleRef.id} — ${article.title} (by ${journalist.displayName})`);
+  // One after the other, so their creation dates keep the order of the seed data.
+  for (const comment of comments) {
+    await seedComment(services, users, articleRef.id, comment);
+  }
 }
 
 async function seedArticles() {

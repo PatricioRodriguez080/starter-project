@@ -68,13 +68,13 @@ npm run emulators
 
 ### Seeding the emulator with sample articles
 The first time, the emulator starts empty. To create two demo journalist accounts and the `articles` collection with sample
-articles and their thumbnails in `media/articles`, install the dependencies once and, with the emulators running, run the
+articles, their comments and their thumbnails in `media/articles`, install the dependencies once and, with the emulators running, run the
 seed script in another terminal:
 ```
 npm install
 npm run seed
 ```
-The script publishes each article signed in as its author and writes through `firestore.rules` and `storage.rules`, so the
+The script publishes each article and comment signed in as its author and writes through `firestore.rules` and `storage.rules`, so the
 sample data always follows the [schema](docs/DB_SCHEMA.md). The demo accounts (emulator only) are listed in
 `scripts/seed-data/users.json`; you can sign in to the app with any of them.
 
