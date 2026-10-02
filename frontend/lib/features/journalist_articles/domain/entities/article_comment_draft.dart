@@ -1,11 +1,11 @@
-import 'package:equatable/equatable.dart';
+import 'package:news_app_clean_architecture/core/util/value_equality.dart';
 
 enum ArticleCommentDraftError { blank, tooLong }
 
 /// Comment that a journalist is writing on an article. Its author is the signed-in journalist.
 ///
 /// Its rules mirror the schema enforced by the backend (backend/docs/DB_SCHEMA.md).
-class ArticleCommentDraftEntity extends Equatable {
+class ArticleCommentDraftEntity with ValueEquality {
   static const int maxContentLength = 1000;
 
   final String articleId;

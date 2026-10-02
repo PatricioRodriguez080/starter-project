@@ -1,9 +1,9 @@
-import 'package:equatable/equatable.dart';
+import 'package:news_app_clean_architecture/core/util/value_equality.dart';
 
 import 'credentials_rules.dart';
 
 /// Account that a journalist is filling in the registration form.
-class RegistrationDraftEntity extends Equatable {
+class RegistrationDraftEntity with ValueEquality {
   final String name;
   final String email;
   final String password;

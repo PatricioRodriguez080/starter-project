@@ -1,4 +1,4 @@
-import 'package:equatable/equatable.dart';
+import 'package:news_app_clean_architecture/core/util/value_equality.dart';
 
 import 'article_thumbnail.dart';
 
@@ -9,7 +9,7 @@ enum ArticleDraftError { blank, tooLong, missing, unsupportedType, tooLarge }
 ///
 /// Its rules mirror the schema enforced by the backend (backend/docs/DB_SCHEMA.md),
 /// so an invalid article is detected before it reaches Firebase.
-class ArticleDraftEntity extends Equatable {
+class ArticleDraftEntity with ValueEquality {
   static const int maxTitleLength = 150;
   static const int maxDescriptionLength = 300;
   static const int maxContentLength = 20000;

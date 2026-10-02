@@ -1,8 +1,8 @@
-import 'package:equatable/equatable.dart';
+import 'package:news_app_clean_architecture/core/util/value_equality.dart';
 import 'package:news_app_clean_architecture/core/util/initials.dart';
 
 /// Comment written by a journalist on a published article.
-class ArticleCommentEntity extends Equatable {
+class ArticleCommentEntity with ValueEquality {
   final String id;
   final String content;
   final String author;

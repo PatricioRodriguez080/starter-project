@@ -1,8 +1,8 @@
-import 'package:equatable/equatable.dart';
+import 'package:news_app_clean_architecture/core/util/value_equality.dart';
 import 'package:news_app_clean_architecture/core/util/initials.dart';
 
 /// Journalist signed in to the app.
-class UserEntity extends Equatable {
+class UserEntity with ValueEquality {
   final String id;
   final String name;
   final String email;

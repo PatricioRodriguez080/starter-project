@@ -1,4 +1,4 @@
-import 'package:equatable/equatable.dart';
+import 'package:news_app_clean_architecture/core/util/value_equality.dart';
 import 'package:news_app_clean_architecture/core/resources/data_state.dart';
 import 'package:news_app_clean_architecture/core/usecase/usecase.dart';
 import 'package:news_app_clean_architecture/features/auth/domain/entities/credentials_rules.dart';
@@ -6,7 +6,7 @@ import 'package:news_app_clean_architecture/features/auth/domain/entities/user.d
 import 'package:news_app_clean_architecture/features/auth/domain/repository/auth_repository.dart';
 
 /// Email and password written in the sign-in form.
-class SignInParams extends Equatable {
+class SignInParams with ValueEquality {
   final String email;
   final String password;
 

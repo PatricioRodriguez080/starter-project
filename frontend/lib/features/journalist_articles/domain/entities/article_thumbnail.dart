@@ -1,9 +1,9 @@
 import 'dart:typed_data';
 
-import 'package:equatable/equatable.dart';
+import 'package:news_app_clean_architecture/core/util/value_equality.dart';
 
 /// Image chosen by the journalist as the thumbnail of an article.
-class ArticleThumbnailEntity extends Equatable {
+class ArticleThumbnailEntity with ValueEquality {
   static const int maxSizeInBytes = 5 * 1024 * 1024;
   static const List<String> allowedExtensions = ['jpg', 'jpeg', 'png', 'webp'];
 
