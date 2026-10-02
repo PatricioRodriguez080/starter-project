@@ -23,6 +23,12 @@ import 'features/journalist_articles/domain/use_cases/pick_article_thumbnail.dar
 import 'features/journalist_articles/domain/use_cases/publish_article.dart';
 import 'features/journalist_articles/presentation/bloc/publish_article/publish_article_cubit.dart';
 import 'features/journalist_articles/presentation/bloc/published_articles/published_articles_cubit.dart';
+import 'features/settings/data/data_sources/local/settings_local_data_source.dart';
+import 'features/settings/data/repository/settings_repository_impl.dart';
+import 'features/settings/domain/repository/settings_repository.dart';
+import 'features/settings/domain/use_cases/get_theme_preference.dart';
+import 'features/settings/domain/use_cases/save_theme_preference.dart';
+import 'features/settings/presentation/bloc/theme/theme_cubit.dart';
 
 final sl = GetIt.instance;
 
@@ -69,6 +75,16 @@ Future<void> initializeDependencies() async {
   );
 
   await _initializeJournalistArticlesDependencies();
+  _initializeSettingsDependencies();
+}
+
+void _initializeSettingsDependencies() {
+  sl.registerSingleton<SettingsLocalDataSource>(SettingsLocalDataSourceImpl());
+  sl.registerSingleton<SettingsRepository>(SettingsRepositoryImpl(sl()));
+  sl.registerSingleton<GetThemePreferenceUseCase>(GetThemePreferenceUseCase(sl()));
+  sl.registerSingleton<SaveThemePreferenceUseCase>(SaveThemePreferenceUseCase(sl()));
+  // A single instance: the whole app is drawn with the theme it holds.
+  sl.registerSingleton<ThemeCubit>(ThemeCubit(sl(), sl()));
 }
 
 Future<void> _initializeJournalistArticlesDependencies() async {

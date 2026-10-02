@@ -18,42 +18,43 @@ class ArticleThumbnailPicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     final errorText = this.errorText;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        thumbnail == null ? _buildAttachBox() : _buildPreview(thumbnail!),
+        thumbnail == null ? _buildAttachBox(palette) : _buildPreview(thumbnail!),
         if (errorText != null)
           Padding(
             padding: const EdgeInsets.only(top: 6, left: 12),
-            child: Text(errorText, style: const TextStyle(color: AppColors.error, fontSize: 12)),
+            child: Text(errorText, style: TextStyle(color: palette.error, fontSize: 12)),
           ),
       ],
     );
   }
 
-  Widget _buildAttachBox() {
+  Widget _buildAttachBox(AppPalette palette) {
     return CustomPaint(
       foregroundPainter: _DashedBorderPainter(
-        color: errorText == null ? const Color(0xFFA9BDD6) : AppColors.error,
+        color: errorText == null ? palette.dashedBorder : palette.error,
       ),
       child: Material(
-        color: AppColors.surface,
+        color: palette.surface,
         borderRadius: BorderRadius.circular(16),
         child: InkWell(
           onTap: onPick,
           borderRadius: BorderRadius.circular(16),
-          child: const SizedBox(
+          child: SizedBox(
             height: 120,
             width: double.infinity,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.add_photo_alternate_outlined, size: 28, color: AppColors.primary),
-                SizedBox(height: 8),
+                Icon(Icons.add_photo_alternate_outlined, size: 28, color: palette.primary),
+                const SizedBox(height: 8),
                 Text(
                   'Attach Image',
-                  style: TextStyle(color: AppColors.primary, fontSize: 14, fontWeight: FontWeight.w800),
+                  style: TextStyle(color: palette.primary, fontSize: 14, fontWeight: FontWeight.w800),
                 ),
               ],
             ),
@@ -90,19 +91,20 @@ class _ChangeImageLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return IgnorePointer(
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: AppColors.surface.withValues(alpha: 0.9),
+          color: palette.surface.withValues(alpha: 0.9),
           borderRadius: BorderRadius.circular(20),
         ),
-        child: const Row(
+        child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.edit_outlined, size: 14, color: AppColors.textPrimary),
-            SizedBox(width: 4),
-            Text('Change image', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+            Icon(Icons.edit_outlined, size: 14, color: palette.textPrimary),
+            const SizedBox(width: 4),
+            const Text('Change image', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
           ],
         ),
       ),

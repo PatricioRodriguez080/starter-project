@@ -9,13 +9,14 @@ class PublicationDateText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return Row(
       children: [
-        const Icon(Icons.schedule, size: 14, color: AppColors.textSecondary),
+        Icon(Icons.schedule, size: 14, color: palette.textSecondary),
         const SizedBox(width: 4),
         Text(
           DateFormat('MMM d, y · HH:mm').format(publishedAt.toLocal()),
-          style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+          style: TextStyle(fontSize: 12, color: palette.textSecondary),
         ),
       ],
     );

@@ -15,7 +15,7 @@ class JournalistArticleDetailScreen extends StatelessWidget {
       appBar: AppBar(
         leading: IconButton(
           onPressed: () => Navigator.pop(context),
-          icon: const Icon(Ionicons.chevronBack, color: Colors.black),
+          icon: const Icon(Ionicons.chevronBack),
         ),
       ),
       body: ListView(

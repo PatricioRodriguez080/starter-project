@@ -25,7 +25,7 @@ class PublishArticleScreen extends StatelessWidget {
             icon: const Icon(Ionicons.chevronBack),
           ),
           title: const Text('Publish Article'),
-          shape: const Border(bottom: BorderSide(color: AppColors.divider)),
+          shape: Border(bottom: BorderSide(color: context.palette.divider)),
         ),
         body: _ArticleForm(state: state),
         bottomNavigationBar: _PublishButton(isPublishing: state is PublishArticleInProgress),
@@ -179,6 +179,7 @@ class _PublishButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
@@ -187,7 +188,7 @@ class _PublishButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(28),
             boxShadow: [
               BoxShadow(
-                color: AppColors.primary.withValues(alpha: 0.3),
+                color: palette.primary.withValues(alpha: 0.3),
                 blurRadius: 16,
                 offset: const Offset(0, 6),
               ),
@@ -196,9 +197,9 @@ class _PublishButton extends StatelessWidget {
           child: FilledButton.icon(
             onPressed: isPublishing ? null : context.read<PublishArticleCubit>().publish,
             icon: isPublishing
-                ? const SizedBox.square(
+                ? SizedBox.square(
                     dimension: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                    child: CircularProgressIndicator(strokeWidth: 2, color: palette.onPrimary),
                   )
                 : const Icon(Icons.login),
             label: Text(isPublishing ? 'Publishing…' : 'Publish Article'),

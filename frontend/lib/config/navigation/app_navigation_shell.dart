@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../features/daily_news/presentation/pages/home/daily_news.dart';
 import '../../features/daily_news/presentation/pages/saved_article/saved_article.dart';
 import '../../features/journalist_articles/presentation/bloc/published_articles/published_articles_cubit.dart';
+import '../../features/settings/presentation/screens/settings/settings_screen.dart';
 import 'app_bottom_navigation_bar.dart';
 import 'coming_soon_screen.dart';
 
@@ -53,12 +54,7 @@ class _AppNavigationShellState extends State<AppNavigationShell> {
           icon: Icons.person_outline_rounded,
         );
       case AppSection.settings:
-        return const ComingSoonScreen(
-          title: 'Settings',
-          heading: 'Settings',
-          message: 'Settings will be added later.',
-          icon: Icons.settings_outlined,
-        );
+        return const SettingsScreen();
     }
   }
 

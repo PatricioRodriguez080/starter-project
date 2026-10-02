@@ -30,7 +30,7 @@ class ArticleDetailsView extends HookWidget {
         builder: (context) => GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTap: () => _onBackButtonTapped(context),
-          child: const Icon(Ionicons.chevronBack, color: Colors.black),
+          child: const Icon(Ionicons.chevronBack),
         ),
       ),
     );
@@ -103,7 +103,7 @@ class ArticleDetailsView extends HookWidget {
     return Builder(
       builder: (context) => FloatingActionButton(
         onPressed: () => _onFloatingActionButtonPressed(context),
-        child: const Icon(Ionicons.bookmark, color: Colors.white),
+        child: const Icon(Ionicons.bookmark),
       ),
     );
   }
@@ -116,7 +116,6 @@ class ArticleDetailsView extends HookWidget {
     BlocProvider.of<LocalArticleBloc>(context).add(SaveArticle(article!));
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        backgroundColor: Colors.black,
         content: Text('Article saved successfully.'),
       ),
     );

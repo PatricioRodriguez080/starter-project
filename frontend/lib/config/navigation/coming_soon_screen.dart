@@ -19,10 +19,11 @@ class ComingSoonScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return Scaffold(
       appBar: AppBar(
         title: Text(title),
-        shape: const Border(bottom: BorderSide(color: AppColors.divider)),
+        shape: Border(bottom: BorderSide(color: palette.divider)),
       ),
       body: Center(
         child: Padding(
@@ -33,8 +34,8 @@ class ComingSoonScreen extends StatelessWidget {
               Container(
                 width: 96,
                 height: 96,
-                decoration: const BoxDecoration(shape: BoxShape.circle, color: AppColors.primarySoft),
-                child: Icon(icon, size: 44, color: AppColors.primary),
+                decoration: BoxDecoration(shape: BoxShape.circle, color: palette.primarySoft),
+                child: Icon(icon, size: 44, color: palette.primary),
               ),
               const SizedBox(height: 16),
               Text(heading, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900)),
@@ -42,7 +43,7 @@ class ComingSoonScreen extends StatelessWidget {
               Text(
                 message,
                 textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 14, height: 1.5, color: AppColors.textSecondary),
+                style: TextStyle(fontSize: 14, height: 1.5, color: palette.textSecondary),
               ),
             ],
           ),

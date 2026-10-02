@@ -7,6 +7,9 @@ import 'package:news_app_clean_architecture/config/navigation/app_navigation_she
 import 'config/theme/app_themes.dart';
 import 'features/daily_news/presentation/bloc/article/remote/remote_article_bloc.dart';
 import 'features/journalist_articles/presentation/bloc/published_articles/published_articles_cubit.dart';
+import 'features/settings/domain/entities/theme_preference.dart';
+import 'features/settings/presentation/bloc/theme/app_theme_mode.dart';
+import 'features/settings/presentation/bloc/theme/theme_cubit.dart';
 import 'firebase_options.dart';
 import 'injection_container.dart';
 
@@ -14,12 +17,14 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await initializeDependencies();
+  // Loaded before the first frame, so the app never flashes with the other theme.
+  await sl<ThemeCubit>().loadTheme();
 
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -31,12 +36,18 @@ class MyApp extends StatelessWidget {
         BlocProvider<PublishedArticlesCubit>(
           create: (context) => sl()..loadArticles(),
         ),
+        BlocProvider<ThemeCubit>.value(value: sl<ThemeCubit>()),
       ],
-      child: MaterialApp(
+      child: BlocBuilder<ThemeCubit, AppTheme>(
+        builder: (context, selectedTheme) => MaterialApp(
           debugShowCheckedModeBanner: false,
-          theme: theme(),
+          theme: lightTheme(),
+          darkTheme: darkTheme(),
+          themeMode: selectedTheme.themeMode,
           onGenerateRoute: AppRoutes.onGenerateRoutes,
-          home: const AppNavigationShell()),
+          home: const AppNavigationShell(),
+        ),
+      ),
     );
   }
 }

@@ -19,6 +19,7 @@ class JournalistArticleTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return InkWell(
       onTap: () => onPressed(article),
       child: Padding(
@@ -28,9 +29,9 @@ class JournalistArticleTile extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildThumbnail(),
+              _buildThumbnail(palette),
               const SizedBox(width: 14),
-              Expanded(child: _buildTexts()),
+              Expanded(child: _buildTexts(palette)),
             ],
           ),
         ),
@@ -38,25 +39,25 @@ class JournalistArticleTile extends StatelessWidget {
     );
   }
 
-  Widget _buildThumbnail() {
+  Widget _buildThumbnail(AppPalette palette) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(18),
       child: Container(
         width: _thumbnailSize,
         height: _thumbnailSize,
-        color: AppColors.imagePlaceholder,
+        color: palette.imagePlaceholder,
         child: CachedNetworkImage(
           imageUrl: article.thumbnailURL,
           fit: BoxFit.cover,
           placeholder: (_, __) => const Center(child: CircularProgressIndicator()),
-          errorWidget: (_, __, ___) => const Icon(Icons.broken_image_outlined, color: AppColors.icon),
+          errorWidget: (_, __, ___) => Icon(Icons.broken_image_outlined, color: palette.icon),
         ),
       ),
     );
   }
 
   /// Fills the height of the image, with the author and the date aligned to its bottom edge.
-  Widget _buildTexts() {
+  Widget _buildTexts(AppPalette palette) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -71,7 +72,7 @@ class JournalistArticleTile extends StatelessWidget {
           article.description,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: const TextStyle(fontSize: 13, height: 1.4, color: AppColors.textSecondary),
+          style: TextStyle(fontSize: 13, height: 1.4, color: palette.textSecondary),
         ),
         const Spacer(),
         Text(

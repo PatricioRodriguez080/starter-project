@@ -18,18 +18,18 @@ class SavedArticles extends HookWidget {
     return BlocProvider(
       create: (_) => sl<LocalArticleBloc>()..add(const GetSavedArticles()),
       child: Scaffold(
-        appBar: _buildAppBar(),
+        appBar: _buildAppBar(context),
         body: _buildBody(),
       ),
     );
   }
 
   /// A section of the bottom navigation bar, so it has no back button.
-  PreferredSizeWidget _buildAppBar() {
+  PreferredSizeWidget _buildAppBar(BuildContext context) {
     return AppBar(
       automaticallyImplyLeading: false,
       title: const Text('Saved Articles'),
-      shape: const Border(bottom: BorderSide(color: AppColors.divider)),
+      shape: Border(bottom: BorderSide(color: context.palette.divider)),
     );
   }
 
@@ -39,19 +39,19 @@ class SavedArticles extends HookWidget {
         if (state is LocalArticlesLoading) {
           return const Center(child: CupertinoActivityIndicator());
         } else if (state is LocalArticlesDone) {
-          return _buildArticlesList(state.articles!);
+          return _buildArticlesList(context, state.articles!);
         }
         return Container();
       },
     );
   }
 
-  Widget _buildArticlesList(List<ArticleEntity> articles) {
+  Widget _buildArticlesList(BuildContext context, List<ArticleEntity> articles) {
     if (articles.isEmpty) {
-      return const Center(
+      return Center(
           child: Text(
         'NO SAVED ARTICLES',
-        style: TextStyle(color: AppColors.textSecondary),
+        style: TextStyle(color: context.palette.textSecondary),
       ));
     }
 

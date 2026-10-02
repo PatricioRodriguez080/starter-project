@@ -24,6 +24,7 @@ class ArticleWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return InkWell(
       onTap: _onTap,
       child: Padding(
@@ -33,10 +34,10 @@ class ArticleWidget extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildImage(),
+              _buildImage(palette),
               const SizedBox(width: 14),
-              Expanded(child: _buildTitleAndDescription()),
-              _buildRemovableArea(),
+              Expanded(child: _buildTitleAndDescription(palette)),
+              _buildRemovableArea(palette),
             ],
           ),
         ),
@@ -44,25 +45,25 @@ class ArticleWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildImage() {
+  Widget _buildImage(AppPalette palette) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(18),
       child: Container(
         width: _thumbnailSize,
         height: _thumbnailSize,
-        color: AppColors.imagePlaceholder,
+        color: palette.imagePlaceholder,
         child: CachedNetworkImage(
           imageUrl: article!.urlToImage!,
           fit: BoxFit.cover,
           progressIndicatorBuilder: (_, __, ___) => const Center(child: CupertinoActivityIndicator()),
-          errorWidget: (_, __, ___) => const Icon(Icons.image_outlined, color: AppColors.icon),
+          errorWidget: (_, __, ___) => Icon(Icons.image_outlined, color: palette.icon),
         ),
       ),
     );
   }
 
   /// Fills the height of the image, with the date aligned to its bottom edge.
-  Widget _buildTitleAndDescription() {
+  Widget _buildTitleAndDescription(AppPalette palette) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -77,16 +78,16 @@ class ArticleWidget extends StatelessWidget {
           article!.description ?? '',
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
-          style: const TextStyle(fontSize: 13, height: 1.4, color: AppColors.textSecondary),
+          style: TextStyle(fontSize: 13, height: 1.4, color: palette.textSecondary),
         ),
         const Spacer(),
         Row(
           children: [
-            const Icon(Icons.schedule, size: 14, color: AppColors.textSecondary),
+            Icon(Icons.schedule, size: 14, color: palette.textSecondary),
             const SizedBox(width: 4),
             Text(
               _formatPublicationDate(article!.publishedAt ?? ''),
-              style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+              style: TextStyle(fontSize: 12, color: palette.textSecondary),
             ),
           ],
         ),
@@ -94,12 +95,12 @@ class ArticleWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildRemovableArea() {
+  Widget _buildRemovableArea(AppPalette palette) {
     if (!isRemovable!) return const SizedBox.shrink();
     return IconButton(
       onPressed: _onRemove,
       tooltip: 'Remove from saved',
-      icon: const Icon(Icons.remove_circle_outline, color: AppColors.error),
+      icon: Icon(Icons.remove_circle_outline, color: palette.error),
     );
   }
 

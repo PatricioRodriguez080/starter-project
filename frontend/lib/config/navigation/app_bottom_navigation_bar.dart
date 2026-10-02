@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -6,9 +7,12 @@ import '../theme/app_themes.dart';
 
 enum AppSection { home, saved, profile, settings }
 
-/// Translucent "glass" bar of the app design: Home · Saved · + · Profile · Settings.
+/// Translucent "glass" pill floating above the content: Home · Saved · + · Profile · Settings.
 class AppBottomNavigationBar extends StatelessWidget {
   static const double height = 64;
+  static const double _sideMargin = 16;
+  static const double _minimumBottomMargin = 12;
+  static final BorderRadius _pillShape = BorderRadius.circular(height / 2);
 
   final AppSection currentSection;
   final ValueChanged<AppSection> onSectionSelected;
@@ -23,35 +27,57 @@ class AppBottomNavigationBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ClipRect(
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+    final palette = context.palette;
+    // Rests right on top of the area the phone keeps for its gesture bar (its swipes must not
+    // reach the buttons), and never closer than 12 px to the bottom edge.
+    final bottomMargin = math.max(MediaQuery.paddingOf(context).bottom, _minimumBottomMargin);
+    return Padding(
+      padding: EdgeInsets.only(bottom: bottomMargin),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: _sideMargin),
         child: DecoratedBox(
+          // The shadow is drawn outside the clipped glass, so the pill looks like it floats.
           decoration: BoxDecoration(
-            color: AppColors.navigationBar,
-            border: Border(top: BorderSide(color: AppColors.primary.withValues(alpha: 0.10))),
+            borderRadius: _pillShape,
+            boxShadow: [
+              BoxShadow(color: palette.navigationShadow, blurRadius: 30, offset: const Offset(0, 10)),
+            ],
           ),
-          child: SafeArea(
-            top: false,
-            child: SizedBox(
-              height: height,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 14),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    _buildSectionButton(AppSection.home, Icons.home_outlined, Icons.home_rounded, 'Home'),
-                    _buildSectionButton(AppSection.saved, Icons.bookmark_border_rounded, Icons.bookmark_rounded, 'Saved articles'),
-                    _CreateButton(onPressed: onCreatePressed),
-                    _buildSectionButton(AppSection.profile, Icons.person_outline_rounded, Icons.person_rounded, 'Profile'),
-                    _buildSectionButton(AppSection.settings, Icons.settings_outlined, Icons.settings_rounded, 'Settings'),
-                  ],
+          child: ClipRRect(
+            borderRadius: _pillShape,
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: palette.navigationBar,
+                  borderRadius: _pillShape,
+                  border: Border.all(color: palette.navigationBorder),
+                ),
+                child: SizedBox(
+                  height: height,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    child: _buildButtons(),
+                  ),
                 ),
               ),
             ),
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildButtons() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        _buildSectionButton(AppSection.home, Icons.home_outlined, Icons.home_rounded, 'Home'),
+        _buildSectionButton(AppSection.saved, Icons.bookmark_border_rounded, Icons.bookmark_rounded, 'Saved articles'),
+        _CreateButton(onPressed: onCreatePressed),
+        _buildSectionButton(AppSection.profile, Icons.person_outline_rounded, Icons.person_rounded, 'Profile'),
+        _buildSectionButton(AppSection.settings, Icons.settings_outlined, Icons.settings_rounded, 'Settings'),
+      ],
     );
   }
 
@@ -83,7 +109,8 @@ class _SectionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = isSelected ? AppColors.primary : AppColors.icon;
+    final palette = context.palette;
+    final color = isSelected ? palette.primary : palette.icon;
     return Semantics(
       selected: isSelected,
       child: IconButton(
@@ -100,7 +127,7 @@ class _SectionButton extends StatelessWidget {
               height: 4,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: isSelected ? AppColors.primary : Colors.transparent,
+                color: isSelected ? palette.primary : Colors.transparent,
               ),
             ),
           ],
@@ -117,15 +144,16 @@ class _CreateButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return Container(
       width: 48,
       height: 48,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: AppColors.primary,
+        color: palette.primary,
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.35),
+            color: palette.primary.withValues(alpha: 0.35),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -134,7 +162,7 @@ class _CreateButton extends StatelessWidget {
       child: IconButton(
         onPressed: onPressed,
         tooltip: 'Publish an article',
-        icon: const Icon(Icons.add_rounded, color: Colors.white, size: 26),
+        icon: Icon(Icons.add_rounded, color: palette.onPrimary, size: 26),
       ),
     );
   }
