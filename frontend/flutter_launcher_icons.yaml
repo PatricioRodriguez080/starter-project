@@ -2,8 +2,11 @@
 # a blue rounded square with the white newspaper of the Log in screen.
 flutter_launcher_icons:
   android: true
-  ios: false
+  ios: true
   image_path: "assets/branding/app_icon.png"
+  # iOS draws the rounded corners itself and does not accept transparency, so the corners are filled with the blue.
+  remove_alpha_ios: true
+  background_color_ios: "#1E6FD9"
   # Adaptive icon: each phone draws the blue background with its own shape around the newspaper.
   adaptive_icon_background: "#1E6FD9"
   adaptive_icon_foreground: "assets/branding/app_icon_foreground.png"

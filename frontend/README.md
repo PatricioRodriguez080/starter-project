@@ -20,7 +20,9 @@ Nowadays the Firebase options file is generated with the [FlutterFire CLI](https
 Once you have completed this appropriately, you can start to work with the project.
 
 ### Requirements
-- Flutter (tested with Flutter 3.47.5 / Dart 3.13.4) and an Android emulator or phone (tested on a Pixel 8, API 36)
+- Flutter (tested with Flutter 3.47.5 / Dart 3.13.4)
+- Android: an Android emulator or phone (tested on a Pixel 8, API 36)
+- iOS (macOS only): Xcode with the iOS Simulator (tested with Xcode 26.3 on an iPhone 17 Pro, iOS 26.3)
 - Java 21: the Firebase emulators require it (`firebase-tools` 14 or later) and it also builds the Android app
 - Node.js and the Firebase CLI (`npm install -g firebase-tools`, tested with 15.32.0), to run the emulators
 
@@ -29,8 +31,8 @@ Once you have completed this appropriately, you can start to work with the proje
 ### Generate files for the local database (Floor):
 `dart run build_runner build --delete-conflicting-outputs`
 ### App icon and splash screen
-The app icon and the splash screen are already generated in `android/app/src/main/res`, so nothing needs to be done to
-run the app. They come from the images in `assets/branding` (the Daily News logo of the app design) and are generated
+The app icon and the splash screen are already generated in `android/app/src/main/res` and `ios/Runner`, so nothing
+needs to be done to run the app. They come from the images in `assets/branding` (the Daily News logo of the app design) and are generated
 with two development tools, configured in `flutter_launcher_icons.yaml` and `flutter_native_splash.yaml`. After changing
 those images or settings, generate them again:
 ```
@@ -49,12 +51,14 @@ the Blaze plan on a real Firebase project (see [backend/README.md](../backend/RE
    first time, "Could not find import/export metadata file" are expected. The data is kept between runs when the
    emulators are stopped with `Ctrl+C`.
 2. Optionally, in another terminal of the `backend` folder, create the demo accounts and articles: `npm run seed`.
-3. With the Android emulator (or a phone over USB) running: `npm run android:connect` (from the `backend` folder;
+3. Android only, with the Android emulator (or a phone over USB) running: `npm run android:connect` (from the `backend` folder;
    it runs `adb reverse` for Authentication, Firestore and Storage). On the Android emulator, FlutterFire already reaches the
    emulators of this computer, but this is still needed to load the thumbnails created by `npm run seed`
    (their URLs point to 127.0.0.1); on a phone it is always needed. Run it again every time the device restarts.
-4. From this folder, after installing the dependencies (see above): `flutter run` (or `flutter run --release` to
-   record videos: the debug build is slower).
+   The iOS Simulator shares the network of this computer, so it reaches the emulators directly.
+4. From this folder, after installing the dependencies (see above): `flutter run` and choose the device (on Android,
+   `flutter run --release` to record videos: the debug build is slower; the iOS Simulator runs debug builds). The first
+   iOS build downloads the Firebase SDK with Swift Package Manager and takes a few minutes.
 5. Create an account from the welcome screen, or log in with a demo account created by `npm run seed`
    (see [backend/README.md](../backend/README.md)). The session is kept on the phone, so you only log in once.
 

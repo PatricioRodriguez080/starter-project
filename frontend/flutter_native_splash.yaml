@@ -1,5 +1,5 @@
-# Splash shown while the app starts (`dart run flutter_native_splash:create`). Android shows it before Flutter
-# runs, so it follows the light or dark mode of the phone, not the theme chosen in Settings.
+# Splash shown while the app starts (`dart run flutter_native_splash:create`). Android and iOS show it before
+# Flutter runs, so it follows the light or dark mode of the phone, not the theme chosen in Settings.
 flutter_native_splash:
   color: "#F5F7FA"
   color_dark: "#101418"
@@ -13,5 +13,5 @@ flutter_native_splash:
     icon_background_color: "#F5F7FA"
     icon_background_color_dark: "#101418"
   android: true
-  ios: false
+  ios: true
   web: false
