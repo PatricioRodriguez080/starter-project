@@ -28,9 +28,16 @@ Once you have completed this appropriately, you can start to work with the proje
 `flutter pub get`
 ### Generate files for the local database (Floor):
 `dart run build_runner build --delete-conflicting-outputs`
-### Icons
-The Android launcher icons are already included in `android/app/src/main/res/mipmap-*`, so no icons need to be generated.
-(`flutter_launcher_icons` is not a dependency of this project.)
+### App icon and splash screen
+The app icon and the splash screen are already generated in `android/app/src/main/res`, so nothing needs to be done to
+run the app. They come from the images in `assets/branding` (the Daily News logo of the app design) and are generated
+with two development tools, configured in `flutter_launcher_icons.yaml` and `flutter_native_splash.yaml`. After changing
+those images or settings, generate them again:
+```
+dart run flutter_launcher_icons
+dart run flutter_native_splash:create
+```
+The images themselves are drawn by `tool/render_branding.swift` (macOS): `swift tool/render_branding.swift assets/branding`.
 
 ### Running the app with the Firebase Local Emulator Suite
 Journalists sign in with Firebase Authentication (email and password), their articles are stored in Firestore and their
