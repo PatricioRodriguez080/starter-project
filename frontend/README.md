@@ -62,6 +62,16 @@ Options (`--dart-define`):
 - `USE_FIREBASE_EMULATORS=false`: use the real Firebase project instead of the emulators (Cloud Storage requires Blaze).
 - `FIREBASE_EMULATORS_HOST=<ip>`: reach emulators running on another computer of the network.
 
+### Running the tests
+```
+flutter test
+```
+The `test` folder mirrors `lib`, with one `{fileName}_test.dart` per file. The exception is `test/architecture`, which
+checks the whole of `lib` against [Our App Architecture](../docs/APP_ARCHITECTURE.md) and the
+[Architecture Violations](../docs/ARCHITECTURE_VIOLATIONS.md): the folders of each clean folder, what each layer may
+import, and the shape of models, repositories and use cases. Each test is named after the rule it checks (for example
+"1.1.2 the data layer does not import use_cases") and lists every file that breaks it.
+
 ### How can I best understand this project?
 In order to best understand this project and its underlying intricacies, we recommend that you watch this tutorial: [Flutter Clean Architecture Tutorial](https://www.youtube.com/watch?v=7V_P6dovixg).
 This tutorial **literally builds this project from the ground up** so we really recommend you watch it before developing.
