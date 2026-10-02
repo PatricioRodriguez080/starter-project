@@ -14,7 +14,7 @@ import 'package:news_app_clean_architecture/features/journalist_articles/domain/
 import 'package:news_app_clean_architecture/features/journalist_articles/presentation/bloc/publish_article/publish_article_cubit.dart';
 import 'package:news_app_clean_architecture/features/journalist_articles/presentation/screens/publish_article/publish_article_screen.dart';
 
-/// Publishes every article it receives, as Firestore and Cloud Storage would.
+/// Publishes every article it receives in the name of the signed-in journalist, as Firestore and Cloud Storage would.
 class FakeJournalistArticleRepository implements JournalistArticleRepository {
   @override
   Future<DataState<List<JournalistArticleEntity>>> getPublishedArticles() async => const DataSuccess([]);
@@ -26,7 +26,8 @@ class FakeJournalistArticleRepository implements JournalistArticleRepository {
       title: draft.title,
       description: draft.description,
       content: draft.content,
-      author: draft.author,
+      author: 'Jane Doe',
+      authorId: 'janeDoeUid',
       thumbnailURL: 'https://example.com/media%2Farticles%2Farticle1.png',
       publishedAt: DateTime.utc(2026, 10, 1),
     ));
@@ -102,7 +103,7 @@ void main() {
     await tester.tap(find.text('Publish Article').last);
     await tester.pumpAndSettle();
 
-    expect(find.text('This field is required'), findsNWidgets(4));
+    expect(find.text('This field is required'), findsNWidgets(3));
     expect(find.text('Attach a thumbnail for the article'), findsOneWidget);
     expect(closedWith, isNull);
   });
@@ -126,7 +127,6 @@ void main() {
     await tester.tap(find.text('Attach Image'));
     await tester.pumpAndSettle();
     await fillIn(tester, 'A short summary for the article list', 'A low-cost filter for rural towns.');
-    await fillIn(tester, 'Your name', 'Jane Doe');
     await fillIn(tester, 'Add article here…', 'When the first prototype was installed...');
     await tester.tap(find.text('Publish Article').last);
     await tester.pumpAndSettle();

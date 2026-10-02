@@ -13,6 +13,7 @@ void main() {
     'description': 'A team of engineers has designed a low-cost filter.',
     'content': 'When the first prototype was installed last spring...',
     'author': 'Jane Doe',
+    'authorId': 'janeDoeUid',
     'thumbnailURL': 'https://example.com/media%2Farticles%2Farticle1.jpg',
     'publishedAt': publishedAt,
   };
@@ -25,6 +26,7 @@ void main() {
     expect(model.description, rawData['description']);
     expect(model.content, rawData['content']);
     expect(model.author, rawData['author']);
+    expect(model.authorId, rawData['authorId']);
     expect(model.thumbnailURL, rawData['thumbnailURL']);
     expect(model.publishedAt, publishedAt);
   });
@@ -41,18 +43,18 @@ void main() {
         description: rawData['description'],
         content: rawData['content'],
         author: rawData['author'],
+        authorId: rawData['authorId'],
         thumbnailURL: rawData['thumbnailURL'],
         publishedAt: publishedAt,
       ),
     );
   });
 
-  test('builds the fields of a new article from a draft, leaving the date to the server', () {
+  test('builds the fields of a new article from a draft, leaving the author and the date to the data source', () {
     final draft = ArticleDraftEntity(
       title: 'A title',
       description: 'A description',
       content: 'Some content',
-      author: 'Jane Doe',
       thumbnail: ArticleThumbnailEntity(bytes: Uint8List(8), fileExtension: 'jpg'),
     );
 
@@ -62,7 +64,6 @@ void main() {
       'title': 'A title',
       'description': 'A description',
       'content': 'Some content',
-      'author': 'Jane Doe',
       'thumbnailURL': 'https://example.com/thumb.jpg',
     });
   });

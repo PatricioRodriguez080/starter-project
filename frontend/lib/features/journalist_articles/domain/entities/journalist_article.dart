@@ -7,6 +7,9 @@ class JournalistArticleEntity extends Equatable {
   final String description;
   final String content;
   final String author;
+
+  /// ID of the author's account in Firebase Authentication.
+  final String authorId;
   final String thumbnailURL;
   final DateTime publishedAt;
 
@@ -16,11 +19,12 @@ class JournalistArticleEntity extends Equatable {
     required this.description,
     required this.content,
     required this.author,
+    required this.authorId,
     required this.thumbnailURL,
     required this.publishedAt,
   });
 
   @override
   List<Object?> get props =>
-      [id, title, description, content, author, thumbnailURL, publishedAt];
+      [id, title, description, content, author, authorId, thumbnailURL, publishedAt];
 }

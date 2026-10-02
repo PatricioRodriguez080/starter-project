@@ -20,8 +20,6 @@ class PublishArticleCubit extends Cubit<PublishArticleState> {
 
   void updateContent(String content) => _updateDraft(state.draft.copyWith(content: content));
 
-  void updateAuthor(String author) => _updateDraft(state.draft.copyWith(author: author));
-
   Future<void> pickThumbnail() async {
     final dataState = await _pickArticleThumbnailUseCase();
     if (dataState is DataFailed) {

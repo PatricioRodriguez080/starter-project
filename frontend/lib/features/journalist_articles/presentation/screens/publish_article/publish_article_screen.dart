@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ionicons/ionicons.dart';
+import 'package:news_app_clean_architecture/config/theme/app_buttons.dart';
 import 'package:news_app_clean_architecture/config/theme/app_themes.dart';
 import 'package:news_app_clean_architecture/features/journalist_articles/domain/entities/article_draft.dart';
 import 'package:news_app_clean_architecture/features/journalist_articles/presentation/bloc/publish_article/publish_article_cubit.dart';
@@ -84,14 +85,6 @@ class _ArticleForm extends StatelessWidget {
           errorText: _visibleError(draft.descriptionError),
           enabled: isEditable,
           onChanged: cubit.updateDescription,
-        ),
-        _DraftTextField(
-          label: 'Author',
-          hint: 'Your name',
-          maxLength: ArticleDraftEntity.maxAuthorLength,
-          errorText: _visibleError(draft.authorError),
-          enabled: isEditable,
-          onChanged: cubit.updateAuthor,
         ),
         _DraftTextField(
           label: 'Article',
@@ -179,31 +172,14 @@ class _PublishButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final palette = context.palette;
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(28),
-            boxShadow: [
-              BoxShadow(
-                color: palette.primary.withValues(alpha: 0.3),
-                blurRadius: 16,
-                offset: const Offset(0, 6),
-              ),
-            ],
-          ),
-          child: FilledButton.icon(
-            onPressed: isPublishing ? null : context.read<PublishArticleCubit>().publish,
-            icon: isPublishing
-                ? SizedBox.square(
-                    dimension: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2, color: palette.onPrimary),
-                  )
-                : const Icon(Icons.login),
-            label: Text(isPublishing ? 'Publishing…' : 'Publish Article'),
-          ),
+        child: AppPrimaryButton(
+          label: isPublishing ? 'Publishing…' : 'Publish Article',
+          icon: Icons.login,
+          isLoading: isPublishing,
+          onPressed: context.read<PublishArticleCubit>().publish,
         ),
       ),
     );

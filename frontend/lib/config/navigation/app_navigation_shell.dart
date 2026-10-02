@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../features/auth/presentation/screens/profile/profile_screen.dart';
 import '../../features/daily_news/presentation/pages/home/daily_news.dart';
 import '../../features/daily_news/presentation/pages/saved_article/saved_article.dart';
 import '../../features/journalist_articles/presentation/bloc/published_articles/published_articles_cubit.dart';
 import '../../features/settings/presentation/screens/settings/settings_screen.dart';
 import 'app_bottom_navigation_bar.dart';
-import 'coming_soon_screen.dart';
 
 /// Main screen of the app: shows the section chosen in the bottom navigation bar.
 /// The home tabs ("Daily News" | "Journalists") live here so the + button can open "Journalists".
@@ -47,12 +47,7 @@ class _AppNavigationShellState extends State<AppNavigationShell> {
       case AppSection.saved:
         return const SavedArticles();
       case AppSection.profile:
-        return const ComingSoonScreen(
-          title: 'Profile',
-          heading: 'Your profile',
-          message: 'Profile details will be added later.',
-          icon: Icons.person_outline_rounded,
-        );
+        return const ProfileScreen();
       case AppSection.settings:
         return const SettingsScreen();
     }

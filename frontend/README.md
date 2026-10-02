@@ -5,7 +5,11 @@ It has a dependency to the backend which ensures that there is data consistency.
 You will be doing most of your work in this folder.
 
 ## Getting Started
-Before you can run the app, you will need to add the Firebase options file to this project.
+> **Just want to try the app?** You do not need your own Firebase project nor `firebase login`: the Firebase options
+> of the project are already included and the app runs against the Firebase Local Emulator Suite. Install the
+> [requirements](#requirements) and follow [Running the app with the Firebase Local Emulator Suite](#running-the-app-with-the-firebase-local-emulator-suite).
+
+To connect the app to your own Firebase project instead, you will need to add its Firebase options file to this project.
 To do this, follow these steps:
 1. Complete the [backend tutorial](../backend/README.md) to create a Firebase project which satisfies the requirements
 2. Watch this [tutorial to setup Firebase for Flutter](https://youtu.be/Wa0rdbb53I8?list=PL4cUxeGkcC9j--TKIdkb3ISfRbJeJYQwC).
@@ -16,8 +20,9 @@ Nowadays the Firebase options file is generated with the [FlutterFire CLI](https
 Once you have completed this appropriately, you can start to work with the project.
 
 ### Requirements
-- Flutter (tested with Flutter 3.47.5 / Dart 3.13.4)
-- Java 17 (required by the Android Gradle Plugin)
+- Flutter (tested with Flutter 3.47.5 / Dart 3.13.4) and an Android emulator or phone (tested on a Pixel 8, API 36)
+- Java 21: the Firebase emulators require it (`firebase-tools` 14 or later) and it also builds the Android app
+- Node.js and the Firebase CLI (`npm install -g firebase-tools`, tested with 15.32.0), to run the emulators
 
 ### Install the Project Dependencies (in pubspec.yaml)
 `flutter pub get`
@@ -28,15 +33,23 @@ The Android launcher icons are already included in `android/app/src/main/res/mip
 (`flutter_launcher_icons` is not a dependency of this project.)
 
 ### Running the app with the Firebase Local Emulator Suite
-The journalists' articles are stored in Firestore and their thumbnails in Cloud Storage. Since Cloud Storage requires
+Journalists sign in with Firebase Authentication (email and password), their articles are stored in Firestore and their
+thumbnails in Cloud Storage. Since Cloud Storage requires
 the Blaze plan on a real Firebase project (see [backend/README.md](../backend/README.md)), the app connects to the
 **Firebase Local Emulator Suite by default**:
-1. Start the emulators from the `backend` folder: `npm run emulators` (the data is kept between runs).
-2. With the Android emulator (or a phone over USB) running: `npm run android:connect` (from the `backend` folder;
-   it runs `adb reverse` for Firestore and Storage). On the Android emulator, FlutterFire already reaches the
+1. From the `backend` folder, install its dependencies once (`npm install`) and start the emulators:
+   `npm run emulators`. No Firebase account is needed: the warnings "You are not currently authenticated" and, the
+   first time, "Could not find import/export metadata file" are expected. The data is kept between runs when the
+   emulators are stopped with `Ctrl+C`.
+2. Optionally, in another terminal of the `backend` folder, create the demo accounts and articles: `npm run seed`.
+3. With the Android emulator (or a phone over USB) running: `npm run android:connect` (from the `backend` folder;
+   it runs `adb reverse` for Authentication, Firestore and Storage). On the Android emulator, FlutterFire already reaches the
    emulators of this computer, but this is still needed to load the thumbnails created by `npm run seed`
    (their URLs point to 127.0.0.1); on a phone it is always needed. Run it again every time the device restarts.
-3. Run the app: `flutter run` (or `flutter run --release` to record videos: the debug build is slower).
+4. From this folder, after installing the dependencies (see above): `flutter run` (or `flutter run --release` to
+   record videos: the debug build is slower).
+5. Create an account from the welcome screen, or log in with a demo account created by `npm run seed`
+   (see [backend/README.md](../backend/README.md)). The session is kept on the phone, so you only log in once.
 
 Options (`--dart-define`):
 - `USE_FIREBASE_EMULATORS=false`: use the real Firebase project instead of the emulators (Cloud Storage requires Blaze).

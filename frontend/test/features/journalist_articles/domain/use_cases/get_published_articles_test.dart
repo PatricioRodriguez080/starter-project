@@ -24,6 +24,7 @@ void main() {
         description: 'A team of engineers has designed a low-cost filter.',
         content: 'When the first prototype was installed last spring...',
         author: 'Jane Doe',
+        authorId: 'janeDoeUid',
         thumbnailURL: 'https://example.com/thumbnail.png',
         publishedAt: DateTime.utc(2026, 9, 30),
       ),

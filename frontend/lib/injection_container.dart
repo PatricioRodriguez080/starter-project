@@ -5,6 +5,16 @@ import 'package:news_app_clean_architecture/features/daily_news/data/repository/
 import 'package:news_app_clean_architecture/features/daily_news/domain/repository/article_repository.dart';
 import 'package:news_app_clean_architecture/features/daily_news/domain/usecases/get_article.dart';
 import 'package:news_app_clean_architecture/features/daily_news/presentation/bloc/article/remote/remote_article_bloc.dart';
+import 'features/auth/data/data_sources/remote/auth_remote_data_source.dart';
+import 'features/auth/data/repository/auth_repository_impl.dart';
+import 'features/auth/domain/repository/auth_repository.dart';
+import 'features/auth/domain/use_cases/register.dart';
+import 'features/auth/domain/use_cases/sign_in.dart';
+import 'features/auth/domain/use_cases/sign_out.dart';
+import 'features/auth/domain/use_cases/watch_session.dart';
+import 'features/auth/presentation/bloc/register/register_cubit.dart';
+import 'features/auth/presentation/bloc/session/session_cubit.dart';
+import 'features/auth/presentation/bloc/sign_in/sign_in_cubit.dart';
 import 'features/daily_news/data/data_sources/local/app_database.dart';
 import 'features/daily_news/domain/usecases/get_saved_article.dart';
 import 'features/daily_news/domain/usecases/remove_article.dart';
@@ -12,7 +22,6 @@ import 'features/daily_news/domain/usecases/save_article.dart';
 import 'features/daily_news/presentation/bloc/article/local/local_article_bloc.dart';
 import 'features/journalist_articles/data/data_sources/local/article_thumbnail_gallery_data_source.dart';
 import 'features/journalist_articles/data/data_sources/remote/article_thumbnail_remote_data_source.dart';
-import 'features/journalist_articles/data/data_sources/remote/firebase_emulators.dart';
 import 'features/journalist_articles/data/data_sources/remote/journalist_article_remote_data_source.dart';
 import 'features/journalist_articles/data/repository/article_thumbnail_repository_impl.dart';
 import 'features/journalist_articles/data/repository/journalist_article_repository_impl.dart';
@@ -29,6 +38,7 @@ import 'features/settings/domain/repository/settings_repository.dart';
 import 'features/settings/domain/use_cases/get_theme_preference.dart';
 import 'features/settings/domain/use_cases/save_theme_preference.dart';
 import 'features/settings/presentation/bloc/theme/theme_cubit.dart';
+import 'shared/firebase/data/data_sources/remote/firebase_emulators.dart';
 
 final sl = GetIt.instance;
 
@@ -74,8 +84,24 @@ Future<void> initializeDependencies() async {
     ()=> LocalArticleBloc(sl(),sl(),sl())
   );
 
-  await _initializeJournalistArticlesDependencies();
+  // Before any Firebase request, so every feature talks to the same backend.
+  await connectToFirebaseEmulatorsIfEnabled();
+  _initializeAuthDependencies();
+  _initializeJournalistArticlesDependencies();
   _initializeSettingsDependencies();
+}
+
+void _initializeAuthDependencies() {
+  sl.registerSingleton<AuthRemoteDataSource>(AuthRemoteDataSourceImpl());
+  sl.registerSingleton<AuthRepository>(AuthRepositoryImpl(sl()));
+  sl.registerSingleton<WatchSessionUseCase>(WatchSessionUseCase(sl()));
+  sl.registerSingleton<SignInUseCase>(SignInUseCase(sl()));
+  sl.registerSingleton<RegisterUseCase>(RegisterUseCase(sl()));
+  sl.registerSingleton<SignOutUseCase>(SignOutUseCase(sl()));
+  // A single instance: the whole app follows the session it holds.
+  sl.registerSingleton<SessionCubit>(SessionCubit(sl(), sl()));
+  sl.registerFactory<SignInCubit>(() => SignInCubit(sl()));
+  sl.registerFactory<RegisterCubit>(() => RegisterCubit(sl()));
 }
 
 void _initializeSettingsDependencies() {
@@ -87,9 +113,7 @@ void _initializeSettingsDependencies() {
   sl.registerSingleton<ThemeCubit>(ThemeCubit(sl(), sl()));
 }
 
-Future<void> _initializeJournalistArticlesDependencies() async {
-  await connectToFirebaseEmulatorsIfEnabled();
-
+void _initializeJournalistArticlesDependencies() {
   //Data sources
   sl.registerSingleton<JournalistArticleRemoteDataSource>(JournalistArticleRemoteDataSourceImpl());
   sl.registerSingleton<ArticleThumbnailRemoteDataSource>(ArticleThumbnailRemoteDataSourceImpl());

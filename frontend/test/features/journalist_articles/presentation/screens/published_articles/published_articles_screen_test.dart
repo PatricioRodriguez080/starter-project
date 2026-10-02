@@ -26,6 +26,7 @@ void main() {
       description: 'End-to-end test of the data layer.',
       content: 'This article was written in the app.',
       author: 'Jane Doe',
+      authorId: 'janeDoeUid',
       thumbnailURL: '',
       publishedAt: DateTime.utc(2026, 10, 1),
     ),

@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../features/auth/presentation/bloc/register/register_cubit.dart';
+import '../../features/auth/presentation/bloc/sign_in/sign_in_cubit.dart';
+import '../../features/auth/presentation/screens/register/register_screen.dart';
+import '../../features/auth/presentation/screens/sign_in/sign_in_screen.dart';
 import '../../features/daily_news/domain/entities/article.dart';
 import '../../features/daily_news/presentation/pages/article_detail/article_detail.dart';
 import '../../features/journalist_articles/domain/entities/journalist_article.dart';
@@ -8,14 +12,25 @@ import '../../features/journalist_articles/presentation/bloc/publish_article/pub
 import '../../features/journalist_articles/presentation/screens/journalist_article_detail/journalist_article_detail_screen.dart';
 import '../../features/journalist_articles/presentation/screens/publish_article/publish_article_screen.dart';
 import '../../injection_container.dart';
-import '../navigation/app_navigation_shell.dart';
-
+import '../navigation/auth_gate.dart';
 
 class AppRoutes {
   static Route onGenerateRoutes(RouteSettings settings) {
     switch (settings.name) {
       case '/':
-        return _materialRoute(const AppNavigationShell());
+        return _materialRoute(const AuthGate());
+
+      case '/SignIn':
+        return _materialRoute(BlocProvider(
+          create: (_) => sl<SignInCubit>(),
+          child: const SignInScreen(),
+        ));
+
+      case '/Register':
+        return _materialRoute(BlocProvider(
+          create: (_) => sl<RegisterCubit>(),
+          child: const RegisterScreen(),
+        ));
 
       case '/ArticleDetails':
         return _materialRoute(ArticleDetailsView(article: settings.arguments as ArticleEntity));
@@ -32,7 +47,7 @@ class AppRoutes {
         ));
 
       default:
-        return _materialRoute(const AppNavigationShell());
+        return _materialRoute(const AuthGate());
     }
   }
 

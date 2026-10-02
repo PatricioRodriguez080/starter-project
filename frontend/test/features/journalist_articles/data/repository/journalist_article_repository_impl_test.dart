@@ -27,7 +27,6 @@ void main() {
     title: 'A title',
     description: 'A description',
     content: 'Some content',
-    author: 'Jane Doe',
     thumbnail: ArticleThumbnailEntity(bytes: Uint8List(8), fileExtension: 'JPG'),
   );
   final storedArticle = JournalistArticleModel(
@@ -35,7 +34,8 @@ void main() {
     title: draft.title,
     description: draft.description,
     content: draft.content,
-    author: draft.author,
+    author: 'Jane Doe',
+    authorId: 'janeDoeUid',
     thumbnailURL: thumbnailURL,
     publishedAt: DateTime.utc(2026, 9, 30),
   );

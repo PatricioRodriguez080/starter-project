@@ -9,6 +9,7 @@ class JournalistArticleModel extends JournalistArticleEntity {
     required super.description,
     required super.content,
     required super.author,
+    required super.authorId,
     required super.thumbnailURL,
     required super.publishedAt,
   });
@@ -21,18 +22,19 @@ class JournalistArticleModel extends JournalistArticleEntity {
       description: rawData['description'] as String,
       content: rawData['content'] as String,
       author: rawData['author'] as String,
+      authorId: rawData['authorId'] as String,
       thumbnailURL: rawData['thumbnailURL'] as String,
       publishedAt: rawData['publishedAt'] as DateTime,
     );
   }
 
-  /// Fields of a new article document. `publishedAt` is left out: the server sets it.
+  /// Fields that the journalist wrote in a new article. The data source adds the author, taken from the
+  /// signed-in account, and `publishedAt`, set by the server.
   static Map<String, dynamic> rawDataOfNewArticle(ArticleDraftEntity draft, String thumbnailURL) {
     return {
       'title': draft.title,
       'description': draft.description,
       'content': draft.content,
-      'author': draft.author,
       'thumbnailURL': thumbnailURL,
     };
   }
@@ -44,6 +46,7 @@ class JournalistArticleModel extends JournalistArticleEntity {
       description: description,
       content: content,
       author: author,
+      authorId: authorId,
       thumbnailURL: thumbnailURL,
       publishedAt: publishedAt,
     );

@@ -19,7 +19,6 @@ void main() {
     title: 'Local startup brings clean water to 10,000 homes',
     description: 'A team of engineers has designed a low-cost filter.',
     content: 'When the first prototype was installed last spring...',
-    author: 'Jane Doe',
     thumbnail: ArticleThumbnailEntity(bytes: Uint8List(1024), fileExtension: 'jpg'),
   );
 
@@ -28,7 +27,8 @@ void main() {
     title: validDraft.title,
     description: validDraft.description,
     content: validDraft.content,
-    author: validDraft.author,
+    author: 'Jane Doe',
+    authorId: 'janeDoeUid',
     thumbnailURL: 'https://example.com/thumbnail.jpg',
     publishedAt: DateTime.utc(2026, 9, 30),
   );

@@ -15,6 +15,7 @@ final List<JournalistArticleEntity> _loadingArticles = List.generate(
     description: 'A short summary of the article.',
     content: '',
     author: 'Journalist name',
+    authorId: '',
     thumbnailURL: '',
     publishedAt: DateTime.utc(2026),
   ),

@@ -11,7 +11,6 @@ ArticleDraftEntity buildValidDraft() {
     title: 'Local startup brings clean water to 10,000 homes',
     description: 'A team of engineers has designed a low-cost filter.',
     content: 'When the first prototype was installed last spring...',
-    author: 'Jane Doe',
     thumbnail: validThumbnail,
   );
 }
@@ -20,14 +19,12 @@ ArticleDraftEntity buildDraftWith({
   String? title,
   String? description,
   String? content,
-  String? author,
 }) {
   final draft = buildValidDraft();
   return ArticleDraftEntity(
     title: title ?? draft.title,
     description: description ?? draft.description,
     content: content ?? draft.content,
-    author: author ?? draft.author,
     thumbnail: draft.thumbnail,
   );
 }
@@ -40,7 +37,6 @@ void main() {
     expect(draft.titleError, isNull);
     expect(draft.descriptionError, isNull);
     expect(draft.contentError, isNull);
-    expect(draft.authorError, isNull);
     expect(draft.thumbnailError, isNull);
   });
 
@@ -57,7 +53,6 @@ void main() {
       expect(edited.title, 'A new title');
       expect(edited.description, draft.description);
       expect(edited.content, draft.content);
-      expect(edited.author, draft.author);
       expect(edited.thumbnail, draft.thumbnail);
     });
 
@@ -92,11 +87,6 @@ void main() {
       errorOf: (draft) => draft.contentError,
       draftWith: (value) => buildDraftWith(content: value),
     ),
-    'author': (
-      maxLength: ArticleDraftEntity.maxAuthorLength,
-      errorOf: (draft) => draft.authorError,
-      draftWith: (value) => buildDraftWith(author: value),
-    ),
   };
 
   textFields.forEach((field, rule) {
@@ -130,7 +120,6 @@ void main() {
         title: draft.title,
         description: draft.description,
         content: draft.content,
-        author: draft.author,
         thumbnail: thumbnail,
       );
     }

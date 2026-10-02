@@ -4,7 +4,8 @@ import 'article_thumbnail.dart';
 
 enum ArticleDraftError { blank, tooLong, missing, unsupportedType, tooLarge }
 
-/// Article written by a journalist that has not been published yet.
+/// Article written by a journalist that has not been published yet. Its author is the signed-in journalist,
+/// so the draft does not ask for it.
 ///
 /// Its rules mirror the schema enforced by the backend (backend/docs/DB_SCHEMA.md),
 /// so an invalid article is detected before it reaches Firebase.
@@ -12,19 +13,16 @@ class ArticleDraftEntity extends Equatable {
   static const int maxTitleLength = 150;
   static const int maxDescriptionLength = 300;
   static const int maxContentLength = 20000;
-  static const int maxAuthorLength = 100;
 
   final String title;
   final String description;
   final String content;
-  final String author;
   final ArticleThumbnailEntity? thumbnail;
 
   const ArticleDraftEntity({
     this.title = '',
     this.description = '',
     this.content = '',
-    this.author = '',
     this.thumbnail,
   });
 
@@ -32,14 +30,12 @@ class ArticleDraftEntity extends Equatable {
     String? title,
     String? description,
     String? content,
-    String? author,
     ArticleThumbnailEntity? thumbnail,
   }) {
     return ArticleDraftEntity(
       title: title ?? this.title,
       description: description ?? this.description,
       content: content ?? this.content,
-      author: author ?? this.author,
       thumbnail: thumbnail ?? this.thumbnail,
     );
   }
@@ -51,8 +47,6 @@ class ArticleDraftEntity extends Equatable {
 
   ArticleDraftError? get contentError =>
       _findTextError(content, maxContentLength);
-
-  ArticleDraftError? get authorError => _findTextError(author, maxAuthorLength);
 
   ArticleDraftError? get thumbnailError {
     final thumbnail = this.thumbnail;
@@ -66,7 +60,6 @@ class ArticleDraftEntity extends Equatable {
         titleError,
         descriptionError,
         contentError,
-        authorError,
         thumbnailError,
       ].every((error) => error == null);
 
@@ -77,7 +70,7 @@ class ArticleDraftEntity extends Equatable {
   }
 
   @override
-  List<Object?> get props => [title, description, content, author, thumbnail];
+  List<Object?> get props => [title, description, content, thumbnail];
 }
 
 /// Thrown when trying to publish an [ArticleDraftEntity] that breaks its rules.

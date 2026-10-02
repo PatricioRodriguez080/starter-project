@@ -146,6 +146,7 @@ ThemeData _buildTheme(AppPalette palette, Brightness brightness) {
     tabBarTheme: _tabBarTheme(palette),
     inputDecorationTheme: _inputDecorationTheme(palette),
     filledButtonTheme: _filledButtonTheme(palette),
+    outlinedButtonTheme: _outlinedButtonTheme(palette),
   );
 }
 
@@ -187,6 +188,9 @@ InputDecorationTheme _inputDecorationTheme(AppPalette palette) {
     filled: true,
     fillColor: palette.surface,
     hintStyle: TextStyle(color: palette.textSecondary),
+    helperStyle: TextStyle(fontSize: 12, color: palette.textSecondary),
+    helperMaxLines: 2,
+    errorMaxLines: 2,
     contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
     border: border(palette.inputBorder),
     enabledBorder: border(palette.inputBorder),
@@ -204,6 +208,19 @@ FilledButtonThemeData _filledButtonTheme(AppPalette palette) {
       foregroundColor: palette.onPrimary,
       minimumSize: const Size.fromHeight(56),
       shape: const StadiumBorder(),
+      textStyle: const TextStyle(fontFamily: 'Muli', fontSize: 16, fontWeight: FontWeight.w800),
+    ),
+  );
+}
+
+OutlinedButtonThemeData _outlinedButtonTheme(AppPalette palette) {
+  return OutlinedButtonThemeData(
+    style: OutlinedButton.styleFrom(
+      backgroundColor: palette.surface,
+      foregroundColor: palette.primary,
+      minimumSize: const Size.fromHeight(56),
+      shape: const StadiumBorder(),
+      side: BorderSide(color: palette.inputBorder, width: 1.5),
       textStyle: const TextStyle(fontFamily: 'Muli', fontSize: 16, fontWeight: FontWeight.w800),
     ),
   );

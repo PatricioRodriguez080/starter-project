@@ -27,6 +27,7 @@ void main() {
     description: 'A description',
     content: 'Some content',
     author: 'Jane Doe',
+    authorId: 'janeDoeUid',
     thumbnailURL: 'https://example.com/thumbnail.png',
     publishedAt: DateTime.utc(2026, 9, 30),
   );
@@ -54,8 +55,7 @@ void main() {
       cubit
         ..updateTitle('A title')
         ..updateDescription('A description')
-        ..updateContent('Some content')
-        ..updateAuthor('Jane Doe');
+        ..updateContent('Some content');
 
       expect(
         cubit.state.draft,
@@ -63,7 +63,6 @@ void main() {
           title: 'A title',
           description: 'A description',
           content: 'Some content',
-          author: 'Jane Doe',
         ),
       );
     });
