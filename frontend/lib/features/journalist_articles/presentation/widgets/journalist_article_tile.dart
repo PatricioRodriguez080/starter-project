@@ -1,10 +1,13 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:news_app_clean_architecture/config/theme/app_themes.dart';
 import 'package:news_app_clean_architecture/features/journalist_articles/domain/entities/journalist_article.dart';
 
 import 'publication_date_text.dart';
 
 class JournalistArticleTile extends StatelessWidget {
+  static const double _thumbnailSize = 116;
+
   final JournalistArticleEntity article;
   final void Function(JournalistArticleEntity article) onPressed;
 
@@ -19,12 +22,13 @@ class JournalistArticleTile extends StatelessWidget {
     return InkWell(
       onTap: () => onPressed(article),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         child: SizedBox(
-          height: MediaQuery.of(context).size.width / 2.2,
+          height: _thumbnailSize,
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildThumbnail(context),
+              _buildThumbnail(),
               const SizedBox(width: 14),
               Expanded(child: _buildTexts()),
             ],
@@ -34,36 +38,49 @@ class JournalistArticleTile extends StatelessWidget {
     );
   }
 
-  Widget _buildThumbnail(BuildContext context) {
+  Widget _buildThumbnail() {
     return ClipRRect(
-      borderRadius: BorderRadius.circular(20),
-      child: CachedNetworkImage(
-        imageUrl: article.thumbnailURL,
-        width: MediaQuery.of(context).size.width / 3,
-        height: double.maxFinite,
-        fit: BoxFit.cover,
-        placeholder: (_, __) => const Center(child: CircularProgressIndicator()),
-        errorWidget: (_, __, ___) => const Icon(Icons.broken_image_outlined),
+      borderRadius: BorderRadius.circular(18),
+      child: Container(
+        width: _thumbnailSize,
+        height: _thumbnailSize,
+        color: AppColors.imagePlaceholder,
+        child: CachedNetworkImage(
+          imageUrl: article.thumbnailURL,
+          fit: BoxFit.cover,
+          placeholder: (_, __) => const Center(child: CircularProgressIndicator()),
+          errorWidget: (_, __, ___) => const Icon(Icons.broken_image_outlined, color: AppColors.icon),
+        ),
       ),
     );
   }
 
+  /// Fills the height of the image, with the author and the date aligned to its bottom edge.
   Widget _buildTexts() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           article.title,
-          maxLines: 3,
+          maxLines: 2,
           overflow: TextOverflow.ellipsis,
-          style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 18),
+          style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16, height: 1.25),
         ),
-        const SizedBox(height: 4),
-        Expanded(
-          child: Text(article.description, maxLines: 2, overflow: TextOverflow.ellipsis),
+        const SizedBox(height: 6),
+        Text(
+          article.description,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(fontSize: 13, height: 1.4, color: AppColors.textSecondary),
         ),
-        Text('By ${article.author}', style: const TextStyle(fontSize: 12)),
-        const SizedBox(height: 2),
+        const Spacer(),
+        Text(
+          'By ${article.author}',
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+        ),
+        const SizedBox(height: 6),
         PublicationDateText(publishedAt: article.publishedAt),
       ],
     );

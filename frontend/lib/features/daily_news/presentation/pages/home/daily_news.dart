@@ -3,54 +3,34 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:news_app_clean_architecture/features/daily_news/presentation/bloc/article/remote/remote_article_bloc.dart';
 import 'package:news_app_clean_architecture/features/daily_news/presentation/bloc/article/remote/remote_article_state.dart';
-import 'package:news_app_clean_architecture/features/journalist_articles/presentation/bloc/published_articles/published_articles_cubit.dart';
 import 'package:news_app_clean_architecture/features/journalist_articles/presentation/screens/published_articles/published_articles_screen.dart';
 
 import '../../../domain/entities/article.dart';
 import '../../widgets/article_tile.dart';
 
+/// Home section: the news from NewsAPI and the journalists' articles, in two tabs.
+/// Its tab controller is provided by the app navigation, which also owns the + button.
 class DailyNews extends StatelessWidget {
-  const DailyNews({Key? key}) : super(key: key);
+  const DailyNews({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 2,
-      child: Scaffold(
-        appBar: _buildAppbar(context),
-        body: TabBarView(
-          children: [
-            _buildDailyNewsTab(),
-            const PublishedArticlesScreen(),
-          ],
-        ),
-        floatingActionButton: Builder(
-          builder: (tabContext) => FloatingActionButton(
-            onPressed: () => _onAddArticlePressed(tabContext),
-            child: const Icon(Icons.add),
-          ),
-        ),
+    return Scaffold(
+      appBar: _buildAppbar(),
+      body: TabBarView(
+        children: [
+          _buildDailyNewsTab(),
+          const PublishedArticlesScreen(),
+        ],
       ),
     );
   }
 
-  PreferredSizeWidget _buildAppbar(BuildContext context) {
+  PreferredSizeWidget _buildAppbar() {
     return AppBar(
-      title: const Text(
-        'Daily News',
-        style: TextStyle(color: Colors.black),
-      ),
-      actions: [
-        GestureDetector(
-          onTap: () => _onShowSavedArticlesViewTapped(context),
-          child: const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 14),
-            child: Icon(Icons.bookmark, color: Colors.black),
-          ),
-        ),
-      ],
+      title: const Text('Daily News'),
       bottom: const TabBar(
-        labelColor: Colors.black,
+        indicatorWeight: 3,
         tabs: [
           Tab(text: 'Daily News'),
           Tab(text: 'Journalists'),
@@ -76,35 +56,19 @@ class DailyNews extends StatelessWidget {
     );
   }
 
-  Widget _buildArticlesList(
-      BuildContext context, List<ArticleEntity> articles) {
-    List<Widget> articleWidgets = [];
-    for (var article in articles) {
-      articleWidgets.add(ArticleWidget(
-        article: article,
+  Widget _buildArticlesList(BuildContext context, List<ArticleEntity> articles) {
+    // The bottom padding keeps the last article above the translucent navigation bar.
+    return ListView.builder(
+      padding: EdgeInsets.only(top: 8, bottom: MediaQuery.paddingOf(context).bottom + 8),
+      itemCount: articles.length,
+      itemBuilder: (context, index) => ArticleWidget(
+        article: articles[index],
         onArticlePressed: (article) => _onArticlePressed(context, article),
-      ));
-    }
-
-    return ListView(
-      children: articleWidgets,
+      ),
     );
-  }
-
-  /// Opens the form to publish an article and, once it is published,
-  /// reloads the journalists' articles and shows their tab.
-  Future<void> _onAddArticlePressed(BuildContext tabContext) async {
-    final publishedArticle = await Navigator.pushNamed(tabContext, '/PublishArticle');
-    if (publishedArticle == null || !tabContext.mounted) return;
-    tabContext.read<PublishedArticlesCubit>().loadArticles();
-    DefaultTabController.of(tabContext).animateTo(1);
   }
 
   void _onArticlePressed(BuildContext context, ArticleEntity article) {
     Navigator.pushNamed(context, '/ArticleDetails', arguments: article);
-  }
-
-  void _onShowSavedArticlesViewTapped(BuildContext context) {
-    Navigator.pushNamed(context, '/SavedArticles');
   }
 }

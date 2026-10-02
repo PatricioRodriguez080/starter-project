@@ -1,151 +1,113 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+
+import '../../../../config/theme/app_themes.dart';
 import '../../domain/entities/article.dart';
 
 class ArticleWidget extends StatelessWidget {
+  static const double _thumbnailSize = 116;
+
   final ArticleEntity? article;
   final bool? isRemovable;
   final void Function(ArticleEntity article)? onRemove;
   final void Function(ArticleEntity article)? onArticlePressed;
 
   const ArticleWidget({
-    Key? key,
+    super.key,
     this.article,
     this.onArticlePressed,
     this.isRemovable = false,
     this.onRemove,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
+    return InkWell(
       onTap: _onTap,
-      child: Container(
-        padding: const EdgeInsetsDirectional.only(
-            start: 14, end: 14, bottom: 7, top: 7),
-        height: MediaQuery.of(context).size.width / 2.2,
-        child: Row(
-          children: [
-            _buildImage(context),
-            _buildTitleAndDescription(),
-            _buildRemovableArea(),
-          ],
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: SizedBox(
+          height: _thumbnailSize,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildImage(),
+              const SizedBox(width: 14),
+              Expanded(child: _buildTitleAndDescription()),
+              _buildRemovableArea(),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildImage(BuildContext context) {
-    return CachedNetworkImage(
-        imageUrl: article!.urlToImage!,
-        imageBuilder: (context, imageProvider) => Padding(
-              padding: const EdgeInsetsDirectional.only(end: 14),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(20.0),
-                child: Container(
-                  width: MediaQuery.of(context).size.width / 3,
-                  height: double.maxFinite,
-                  decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.08),
-                      image: DecorationImage(
-                          image: imageProvider, fit: BoxFit.cover)),
-                ),
-              ),
-            ),
-        progressIndicatorBuilder: (context, url, downloadProgress) => Padding(
-              padding: const EdgeInsetsDirectional.only(end: 14),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(20.0),
-                child: Container(
-                  width: MediaQuery.of(context).size.width / 3,
-                  height: double.maxFinite,
-                  child: CupertinoActivityIndicator(),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.08),
-                  ),
-                ),
-              ),
-            ),
-        errorWidget: (context, url, error) => Padding(
-              padding: const EdgeInsetsDirectional.only(end: 14),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(20.0),
-                child: Container(
-                  width: MediaQuery.of(context).size.width / 3,
-                  height: double.maxFinite,
-                  child: Icon(Icons.error),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.08),
-                  ),
-                ),
-              ),
-            ));
+  Widget _buildImage() {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(18),
+      child: Container(
+        width: _thumbnailSize,
+        height: _thumbnailSize,
+        color: AppColors.imagePlaceholder,
+        child: CachedNetworkImage(
+          imageUrl: article!.urlToImage!,
+          fit: BoxFit.cover,
+          progressIndicatorBuilder: (_, __, ___) => const Center(child: CupertinoActivityIndicator()),
+          errorWidget: (_, __, ___) => const Icon(Icons.image_outlined, color: AppColors.icon),
+        ),
+      ),
+    );
   }
 
+  /// Fills the height of the image, with the date aligned to its bottom edge.
   Widget _buildTitleAndDescription() {
-    return Expanded(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 7),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          article!.title ?? '',
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16, height: 1.25),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          article!.description ?? '',
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(fontSize: 13, height: 1.4, color: AppColors.textSecondary),
+        ),
+        const Spacer(),
+        Row(
           children: [
-            // Title
+            const Icon(Icons.schedule, size: 14, color: AppColors.textSecondary),
+            const SizedBox(width: 4),
             Text(
-              article!.title ?? '',
-              maxLines: 3,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                fontFamily: 'Butler',
-                fontWeight: FontWeight.w900,
-                fontSize: 18,
-                color: Colors.black87,
-              ),
-            ),
-
-            // Description
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.only(top: 4),
-                child: Text(
-                  article!.description ?? '',
-                  maxLines: 2,
-                ),
-              ),
-            ),
-
-            // Datetime
-            Row(
-              children: [
-                const Icon(Icons.timeline_outlined, size: 16),
-                const SizedBox(width: 4),
-                Text(
-                  article!.publishedAt!,
-                  style: const TextStyle(
-                    fontSize: 12,
-                  ),
-                ),
-              ],
+              _formatPublicationDate(article!.publishedAt ?? ''),
+              style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
             ),
           ],
         ),
-      ),
+      ],
     );
   }
 
   Widget _buildRemovableArea() {
-    if (isRemovable!) {
-      return GestureDetector(
-        onTap: _onRemove,
-        child: const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 8),
-          child: Icon(Icons.remove_circle_outline, color: Colors.red),
-        ),
-      );
-    }
-    return Container();
+    if (!isRemovable!) return const SizedBox.shrink();
+    return IconButton(
+      onPressed: _onRemove,
+      tooltip: 'Remove from saved',
+      icon: const Icon(Icons.remove_circle_outline, color: AppColors.error),
+    );
+  }
+
+  /// NewsAPI dates are ISO strings ("2026-09-29T18:00:00Z"); anything else is shown as it comes.
+  static String _formatPublicationDate(String publishedAt) {
+    final date = DateTime.tryParse(publishedAt);
+    if (date == null) return publishedAt;
+    return DateFormat('MMM d, y · HH:mm').format(date.toLocal());
   }
 
   void _onTap() {

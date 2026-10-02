@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ionicons/ionicons.dart';
+import 'package:news_app_clean_architecture/config/theme/app_themes.dart';
 import 'package:news_app_clean_architecture/features/journalist_articles/domain/entities/article_draft.dart';
 import 'package:news_app_clean_architecture/features/journalist_articles/presentation/bloc/publish_article/publish_article_cubit.dart';
 import 'package:news_app_clean_architecture/features/journalist_articles/presentation/bloc/publish_article/publish_article_state.dart';
@@ -20,9 +21,11 @@ class PublishArticleScreen extends StatelessWidget {
         appBar: AppBar(
           leading: IconButton(
             onPressed: () => Navigator.pop(context),
-            icon: const Icon(Ionicons.chevronBack, color: Colors.black),
+            tooltip: 'Back',
+            icon: const Icon(Ionicons.chevronBack),
           ),
           title: const Text('Publish Article'),
+          shape: const Border(bottom: BorderSide(color: AppColors.divider)),
         ),
         body: _ArticleForm(state: state),
         bottomNavigationBar: _PublishButton(isPublishing: state is PublishArticleInProgress),
@@ -60,7 +63,9 @@ class _ArticleForm extends StatelessWidget {
       children: [
         _DraftTextField(
           label: 'Title',
+          hint: 'Write your title here…',
           maxLength: ArticleDraftEntity.maxTitleLength,
+          showsCounter: true,
           errorText: _visibleError(draft.titleError),
           enabled: isEditable,
           onChanged: cubit.updateTitle,
@@ -70,9 +75,10 @@ class _ArticleForm extends StatelessWidget {
           errorText: _visibleError(draft.thumbnailError),
           onPick: isEditable ? cubit.pickThumbnail : null,
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 14),
         _DraftTextField(
           label: 'Description',
+          hint: 'A short summary for the article list',
           maxLength: ArticleDraftEntity.maxDescriptionLength,
           maxLines: 3,
           errorText: _visibleError(draft.descriptionError),
@@ -81,6 +87,7 @@ class _ArticleForm extends StatelessWidget {
         ),
         _DraftTextField(
           label: 'Author',
+          hint: 'Your name',
           maxLength: ArticleDraftEntity.maxAuthorLength,
           errorText: _visibleError(draft.authorError),
           enabled: isEditable,
@@ -88,7 +95,9 @@ class _ArticleForm extends StatelessWidget {
         ),
         _DraftTextField(
           label: 'Article',
+          hint: 'Add article here…',
           maxLength: ArticleDraftEntity.maxContentLength,
+          minLines: 6,
           maxLines: 12,
           errorText: _visibleError(draft.contentError),
           enabled: isEditable,
@@ -105,9 +114,14 @@ class _ArticleForm extends StatelessWidget {
   }
 }
 
+/// A field with its label above it. Only the title shows its character counter, as in the design;
+/// the other fields still stop at their maximum length.
 class _DraftTextField extends StatelessWidget {
   final String label;
+  final String hint;
   final int maxLength;
+  final bool showsCounter;
+  final int minLines;
   final int maxLines;
   final String? errorText;
   final bool enabled;
@@ -115,31 +129,46 @@ class _DraftTextField extends StatelessWidget {
 
   const _DraftTextField({
     required this.label,
+    required this.hint,
     required this.maxLength,
     required this.errorText,
     required this.enabled,
     required this.onChanged,
+    this.showsCounter = false,
+    this.minLines = 1,
     this.maxLines = 1,
   });
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: TextField(
-        maxLength: maxLength,
-        minLines: 1,
-        maxLines: maxLines,
-        enabled: enabled,
-        onChanged: onChanged,
-        decoration: InputDecoration(
-          labelText: label,
-          errorText: errorText,
-          alignLabelWithHint: true,
-          border: const OutlineInputBorder(),
-        ),
+      padding: const EdgeInsets.only(bottom: 14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
+          const SizedBox(height: 6),
+          TextField(
+            maxLength: maxLength,
+            buildCounter: showsCounter ? null : _hideCounter,
+            minLines: minLines,
+            maxLines: maxLines,
+            enabled: enabled,
+            onChanged: onChanged,
+            decoration: InputDecoration(hintText: hint, errorText: errorText),
+          ),
+        ],
       ),
     );
+  }
+
+  static Widget? _hideCounter(
+    BuildContext context, {
+    required int currentLength,
+    required bool isFocused,
+    required int? maxLength,
+  }) {
+    return null;
   }
 }
 
@@ -152,17 +181,28 @@ class _PublishButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: FilledButton.icon(
-          onPressed: isPublishing ? null : context.read<PublishArticleCubit>().publish,
-          style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(56)),
-          icon: isPublishing
-              ? const SizedBox.square(
-                  dimension: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : const Icon(Icons.login),
-          label: Text(isPublishing ? 'Publishing…' : 'Publish Article'),
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(28),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.primary.withValues(alpha: 0.3),
+                blurRadius: 16,
+                offset: const Offset(0, 6),
+              ),
+            ],
+          ),
+          child: FilledButton.icon(
+            onPressed: isPublishing ? null : context.read<PublishArticleCubit>().publish,
+            icon: isPublishing
+                ? const SizedBox.square(
+                    dimension: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                  )
+                : const Icon(Icons.login),
+            label: Text(isPublishing ? 'Publishing…' : 'Publish Article'),
+          ),
         ),
       ),
     );

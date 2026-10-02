@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:news_app_clean_architecture/config/theme/app_themes.dart';
 import 'package:news_app_clean_architecture/features/journalist_articles/domain/entities/article_thumbnail.dart';
 
-/// Shows the "Attach Image" button or, once an image is chosen, its preview.
+/// Shows the dashed "Attach Image" box or, once an image is chosen, its preview.
 /// Tapping the preview opens the gallery again so the image can be changed.
 class ArticleThumbnailPicker extends StatelessWidget {
   final ArticleThumbnailEntity? thumbnail;
@@ -19,35 +20,119 @@ class ArticleThumbnailPicker extends StatelessWidget {
   Widget build(BuildContext context) {
     final errorText = this.errorText;
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        thumbnail == null ? _buildAttachButton() : _buildPreview(thumbnail!),
+        thumbnail == null ? _buildAttachBox() : _buildPreview(thumbnail!),
         if (errorText != null)
           Padding(
-            padding: const EdgeInsets.only(top: 6),
-            child: Text(
-              errorText,
-              style: TextStyle(color: Theme.of(context).colorScheme.error, fontSize: 12),
-            ),
+            padding: const EdgeInsets.only(top: 6, left: 12),
+            child: Text(errorText, style: const TextStyle(color: AppColors.error, fontSize: 12)),
           ),
       ],
     );
   }
 
-  Widget _buildAttachButton() {
-    return FilledButton.tonalIcon(
-      onPressed: onPick,
-      icon: const Icon(Icons.add_photo_alternate_outlined),
-      label: const Text('Attach Image'),
+  Widget _buildAttachBox() {
+    return CustomPaint(
+      foregroundPainter: _DashedBorderPainter(
+        color: errorText == null ? const Color(0xFFA9BDD6) : AppColors.error,
+      ),
+      child: Material(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(16),
+        child: InkWell(
+          onTap: onPick,
+          borderRadius: BorderRadius.circular(16),
+          child: const SizedBox(
+            height: 120,
+            width: double.infinity,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.add_photo_alternate_outlined, size: 28, color: AppColors.primary),
+                SizedBox(height: 8),
+                Text(
+                  'Attach Image',
+                  style: TextStyle(color: AppColors.primary, fontSize: 14, fontWeight: FontWeight.w800),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 
   Widget _buildPreview(ArticleThumbnailEntity thumbnail) {
-    return InkWell(
-      onTap: onPick,
-      child: AspectRatio(
-        aspectRatio: 16 / 9,
-        child: Image.memory(thumbnail.bytes, fit: BoxFit.cover, width: double.infinity),
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(16),
+      child: Stack(
+        children: [
+          AspectRatio(
+            aspectRatio: 16 / 9,
+            child: Image.memory(thumbnail.bytes, fit: BoxFit.cover, width: double.infinity),
+          ),
+          Positioned.fill(
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(onTap: onPick),
+            ),
+          ),
+          const Positioned(right: 10, bottom: 10, child: _ChangeImageLabel()),
+        ],
       ),
     );
   }
+}
+
+class _ChangeImageLabel extends StatelessWidget {
+  const _ChangeImageLabel();
+
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: AppColors.surface.withValues(alpha: 0.9),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: const Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.edit_outlined, size: 14, color: AppColors.textPrimary),
+            SizedBox(width: 4),
+            Text('Change image', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _DashedBorderPainter extends CustomPainter {
+  static const double _dashLength = 6;
+  static const double _gapLength = 4;
+
+  final Color color;
+
+  const _DashedBorderPainter({required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.5;
+    final border = Path()
+      ..addRRect(RRect.fromRectAndRadius(Offset.zero & size, const Radius.circular(16)));
+    for (final metric in border.computeMetrics()) {
+      for (double start = 0; start < metric.length; start += _dashLength + _gapLength) {
+        canvas.drawPath(metric.extractPath(start, start + _dashLength), paint);
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(_DashedBorderPainter oldDelegate) => oldDelegate.color != color;
 }

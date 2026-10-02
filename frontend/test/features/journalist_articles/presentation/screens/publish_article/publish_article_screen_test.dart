@@ -50,6 +50,10 @@ void main() {
 
   Future<void> openPublishArticleScreen(WidgetTester tester) async {
     closedWith = null;
+    // Screen of the Pixel 8 used as Android emulator (412 x 914 logical pixels).
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 2.625;
+    addTearDown(tester.view.reset);
     // Like the home screen, the screen that opens the form has a Scaffold where the SnackBar is shown.
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
@@ -76,8 +80,9 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  Future<void> fillIn(WidgetTester tester, String label, String text) async {
-    final field = find.widgetWithText(TextField, label);
+  /// Fields are found by their hint, shown inside them while they are empty.
+  Future<void> fillIn(WidgetTester tester, String hint, String text) async {
+    final field = find.widgetWithText(TextField, hint);
     // The form is a lazy list: fields below the screen are only built after scrolling to them.
     await tester.scrollUntilVisible(field, 100,
         scrollable: find.byType(Scrollable).first);
@@ -110,19 +115,19 @@ void main() {
 
     expect(find.text('Attach Image'), findsNothing);
     expect(find.byType(Image), findsOneWidget);
+    expect(find.text('Change image'), findsOneWidget);
   });
 
   testWidgets('publishes a complete article, tells the journalist and closes',
       (tester) async {
     await openPublishArticleScreen(tester);
 
-    await fillIn(tester, 'Title', 'Local startup brings clean water');
+    await fillIn(tester, 'Write your title here…', 'Local startup brings clean water');
     await tester.tap(find.text('Attach Image'));
     await tester.pumpAndSettle();
-    await fillIn(tester, 'Description', 'A low-cost filter for rural towns.');
-    await fillIn(tester, 'Author', 'Jane Doe');
-    await fillIn(
-        tester, 'Article', 'When the first prototype was installed...');
+    await fillIn(tester, 'A short summary for the article list', 'A low-cost filter for rural towns.');
+    await fillIn(tester, 'Your name', 'Jane Doe');
+    await fillIn(tester, 'Add article here…', 'When the first prototype was installed...');
     await tester.tap(find.text('Publish Article').last);
     await tester.pumpAndSettle();
 

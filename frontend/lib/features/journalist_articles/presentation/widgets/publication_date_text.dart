@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:news_app_clean_architecture/config/theme/app_themes.dart';
 
 class PublicationDateText extends StatelessWidget {
   final DateTime publishedAt;
@@ -10,11 +11,11 @@ class PublicationDateText extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        const Icon(Icons.schedule, size: 16),
+        const Icon(Icons.schedule, size: 14, color: AppColors.textSecondary),
         const SizedBox(width: 4),
         Text(
-          DateFormat.yMMMd().add_Hm().format(publishedAt.toLocal()),
-          style: const TextStyle(fontSize: 12),
+          DateFormat('MMM d, y · HH:mm').format(publishedAt.toLocal()),
+          style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
         ),
       ],
     );
