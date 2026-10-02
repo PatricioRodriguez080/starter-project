@@ -86,3 +86,11 @@ They start the Firestore and Storage emulators with a demo project, so they neve
 npm install
 npm run test:rules
 ```
+
+`test/db_schema.test.mjs` checks that the [schema](docs/DB_SCHEMA.md) and the code say the same thing: the fields, length
+limits and server timestamps of each collection against `firestore.rules`, the thumbnail extensions, content types and
+size against `storage.rules`, and the limits the app checks before writing (its domain entities). It only reads files,
+so it runs without the emulators (it also runs with `npm run test:rules`):
+```
+npm run test:schema
+```
