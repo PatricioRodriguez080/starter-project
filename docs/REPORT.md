@@ -312,7 +312,17 @@ cd frontend && flutter test                 # 314 tests
 cd backend && npm run test:rules            # 111 tests (rules against the emulators, and the schema)
 ```
 
-### 7.2 Commits
+### 7.2 API keys in the repository
+GitHub's secret scanning flags the Google API keys in `frontend/lib/firebase_options.dart`,
+`frontend/android/app/google-services.json` and `frontend/ios/Runner/GoogleService-Info.plist`. They are Firebase API
+keys, and as the [Firebase documentation](https://firebase.google.com/docs/projects/api-keys) explains, they are not
+secrets: they identify the project and are meant to be inside the app, where anyone can read them. What protects the data
+is the security rules: reading requires a signed-in account, articles and comments can only be written by their author's
+account, saved articles are only visible to their owner, and nothing can be edited or deleted. Firebase App Check would
+add a check that requests come from the app itself. The NewsAPI key in `frontend/lib/core/constants/constants.dart` is a
+real secret, but it came committed in the starter project.
+
+### 7.3 Commits
 One commit per step of the README, then one per feature:
 `(1.1)` schema · `(1.3)` rules · `(1.2)` seed of the collection · `(2.0)` toolchain and Firebase · `(2.1)` domain with
 mock data · `(2.2)` presentation · `(2.3)` data layer · design · themes and pill · skeletons · accounts (backend,
