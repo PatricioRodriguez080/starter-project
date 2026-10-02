@@ -1,7 +1,7 @@
 # Database Schema
 
-This document describes how the journalist-uploaded **Articles** and their **Comments** are stored in the Firebase
-backend: the documents live in **Firebase Firestore**, the thumbnails live in **Firebase Cloud Storage** and the
+This document describes how the journalist-uploaded **Articles**, their **Comments** and the articles each journalist
+**saves** are stored in the Firebase backend: the documents live in **Firebase Firestore**, the thumbnails live in **Firebase Cloud Storage** and the
 journalists sign in with **Firebase Authentication** (email and password).
 The constraints listed here are the contract that `firestore.rules` and `storage.rules` enforce.
 
@@ -25,6 +25,11 @@ articles/                                  media/
         author
         authorId ── uid of the account that wrote the comment
         createdAt
+users/
+  {userId}     ── uid of the journalist's account
+    savedArticles/
+      {articleId} ── ID of the saved article
+        savedAt
 ```
 
 ## Firestore
@@ -88,12 +93,35 @@ articles/Xy7Qp2LmT9aB3cD4eF5g/comments/Cm4Rt8NpQ2wE6yU1iO3a
 }
 ```
 
+### Subcollection `users/{userId}/savedArticles`
+
+The articles that a journalist saved to read later. `{userId}` is the uid of their account and each document is named
+after the saved article (`{articleId}`), so an article can only be saved once per journalist. The `users/{userId}`
+document itself is not created: it only groups the journalist's lists.
+
+| Field     | Type        | Required | Constraints                                                                   | Description                    |
+|-----------|-------------|----------|-------------------------------------------------------------------------------|--------------------------------|
+| `savedAt` | `timestamp` | yes      | Set to the server time of the write that creates the document (`request.time`) | When the article was saved.    |
+
+No other fields are allowed: the article is not copied, the app reads it from `articles/{articleId}`.
+
+#### Example document
+
+```
+users/Hk3pT9wQx2Rz8VbN1mLc5Ye7Ud4F/savedArticles/Xy7Qp2LmT9aB3cD4eF5g
+{
+  savedAt: Timestamp(2026-10-02 13:05:00 UTC)
+}
+```
+
 ### Queries and indexes
 
 - The feed lists articles ordered by `publishedAt` descending.
 - The detail view lists the comments of an article ordered by `createdAt` ascending (oldest first, like a conversation).
 - The number of comments shown in the feed is computed by Firestore with a `count()` aggregation query on the
   `comments` subcollection of each article; nothing is stored in the article.
+- The Saved section lists the journalist's `savedArticles` ordered by `savedAt` descending (last saved first) and then
+  reads each article by its ID.
 
 All of them use Firestore's automatic single-field indexes, so `firestore.indexes.json` needs no composite index.
 
@@ -120,6 +148,7 @@ Enforced by `firestore.rules` and `storage.rules`, and covered by the tests in `
 |-----------------------------|----------------|------------------------------------------------------------------------|-----------------|
 | `articles/{articleId}`      | signed-in user | signed-in user, if the document follows the schema and is published in their own name | nobody |
 | `articles/{articleId}/comments/{commentId}` | signed-in user (also counting them) | signed-in user, if the article exists and the comment follows the schema and is written in their own name | nobody |
+| `users/{userId}/savedArticles/{articleId}` | only that user | only that user, if the article exists and is not saved yet | delete: only that user; update: nobody |
 | `media/articles/{fileName}` | signed-in user | signed-in user, if the file follows the schema and does not exist yet  | nobody          |
 | anything else               | nobody         | nobody                                                                 | nobody          |
 
@@ -169,6 +198,11 @@ The schema is based on the articles the app already consumes from [NewsAPI](http
   rules would have to allow editing articles. Counting with a `count()` query keeps articles immutable and the number
   always exact; it costs one read per article for every 1000 comments. With Blaze, a counter kept by a Cloud Function is
   the natural next step.
+- **Saved articles in the journalist's account**: the articles of the journalists are saved in Firestore, in a list that
+  belongs to the account, so they follow the journalist to any phone where they sign in, and the rules keep each list
+  private. The list only stores a reference (the document ID) and the date: articles are immutable, so there is no copy
+  to keep up to date. The news from NewsAPI (Daily News) are not ours and are still saved on the phone, in the local
+  database of the original app.
 - **Immutable comments**: like articles, comments cannot be edited or deleted yet; allowing their authors to do it is
   left as a future improvement.
 - **Orphan thumbnails**: if the upload succeeds but the document creation fails, the image stays in Storage without an

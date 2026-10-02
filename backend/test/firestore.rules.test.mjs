@@ -320,9 +320,71 @@ describe('comments: update and delete', () => {
   });
 });
 
+describe('saved articles', () => {
+  const OTHER_USER_ID = 'johnSmithUid';
+
+  function savedArticle(firestore, { userId = AUTHOR_ID, articleId = ARTICLE_ID } = {}) {
+    return doc(firestore, 'users', userId, 'savedArticles', articleId);
+  }
+
+  async function seedSavedArticleBypassingRules(userId = AUTHOR_ID) {
+    await testEnvironment.withSecurityRulesDisabled(async (context) => {
+      await setDoc(savedArticle(context.firestore(), { userId }), { savedAt: Timestamp.now() });
+    });
+  }
+
+  beforeEach(() => seedArticleBypassingRules());
+
+  test('a journalist can save an article to their own list', async () => {
+    await assertSucceeds(setDoc(savedArticle(database), { savedAt: serverTimestamp() }));
+  });
+
+  test('a journalist can read and remove their own saved articles', async () => {
+    await seedSavedArticleBypassingRules();
+    await assertSucceeds(getDocs(collection(database, 'users', AUTHOR_ID, 'savedArticles')));
+    await assertSucceeds(getDoc(savedArticle(database)));
+    await assertSucceeds(deleteDoc(savedArticle(database)));
+  });
+
+  test('rejects saving to the list of another account', async () => {
+    await assertFails(setDoc(savedArticle(database, { userId: OTHER_USER_ID }), { savedAt: serverTimestamp() }));
+  });
+
+  test('rejects reading or removing the saved articles of another account', async () => {
+    await seedSavedArticleBypassingRules(OTHER_USER_ID);
+    await assertFails(getDocs(collection(database, 'users', OTHER_USER_ID, 'savedArticles')));
+    await assertFails(deleteDoc(savedArticle(database, { userId: OTHER_USER_ID })));
+  });
+
+  test('rejects saving or reading without signing in', async () => {
+    await assertFails(setDoc(savedArticle(anonymousDatabase), { savedAt: serverTimestamp() }));
+    await assertFails(getDoc(savedArticle(anonymousDatabase)));
+  });
+
+  test('rejects saving an article that does not exist', async () => {
+    const missingArticle = savedArticle(database, { articleId: 'MissingArticleId123' });
+    await assertFails(setDoc(missingArticle, { savedAt: serverTimestamp() }));
+  });
+
+  test('rejects a saved date chosen by the client', async () => {
+    await assertFails(setDoc(savedArticle(database), { savedAt: Timestamp.now() }));
+  });
+
+  test('rejects saved articles with fields outside the schema', async () => {
+    await assertFails(setDoc(savedArticle(database), { savedAt: serverTimestamp(), title: 'A copy' }));
+    await assertFails(setDoc(savedArticle(database), {}));
+  });
+
+  test('rejects saving an article that is already saved', async () => {
+    await seedSavedArticleBypassingRules();
+    await assertFails(setDoc(savedArticle(database), { savedAt: serverTimestamp() }));
+  });
+});
+
 describe('other collections', () => {
   test('rejects reading and writing documents outside articles', async () => {
-    await assertFails(getDoc(doc(database, 'users', 'someone')));
-    await assertFails(setDoc(doc(database, 'users', 'someone'), { name: 'Jane' }));
+    await assertFails(getDoc(doc(database, 'users', AUTHOR_ID)));
+    await assertFails(setDoc(doc(database, 'users', AUTHOR_ID), { name: 'Jane' }));
+    await assertFails(getDoc(doc(database, 'reports', 'someone')));
   });
 });

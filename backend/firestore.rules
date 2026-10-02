@@ -24,6 +24,16 @@ service cloud.firestore {
       }
     }
 
+    // Each journalist's own list of saved articles: one document per saved article, named after it.
+    match /users/{userId}/savedArticles/{articleId} {
+      allow read, delete: if isTheSignedInUser(userId);
+      allow create: if isTheSignedInUser(userId)
+        && exists(/databases/$(database)/documents/articles/$(articleId))
+        && isValidSavedArticle(request.resource.data);
+      // Saving an article twice is not needed: the app removes it or keeps it.
+      allow update: if false;
+    }
+
     function isSignedIn() {
       return request.auth != null;
     }
@@ -46,6 +56,15 @@ service cloud.firestore {
     function hasExactlyArticleFields(article) {
       let fields = ['title', 'description', 'content', 'author', 'authorId', 'thumbnailURL', 'publishedAt'];
       return article.keys().hasAll(fields) && article.keys().hasOnly(fields);
+    }
+
+    function isTheSignedInUser(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidSavedArticle(savedArticle) {
+      return savedArticle.keys().hasOnly(['savedAt']) && savedArticle.keys().hasAll(['savedAt'])
+        && savedArticle.savedAt == request.time;
     }
 
     function isValidComment(comment) {
