@@ -3,7 +3,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:news_app_clean_architecture/core/resources/data_state.dart';
 import 'package:news_app_clean_architecture/features/daily_news/domain/entities/article.dart';
 import 'package:news_app_clean_architecture/features/daily_news/domain/repository/article_repository.dart';
-import 'package:news_app_clean_architecture/features/daily_news/domain/usecases/is_article_saved.dart';
+import 'package:news_app_clean_architecture/features/daily_news/domain/use_cases/is_article_saved.dart';
 
 class MockArticleRepository extends Mock implements ArticleRepository {}
 

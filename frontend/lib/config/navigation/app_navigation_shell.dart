@@ -2,13 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../features/auth/presentation/screens/profile/profile_screen.dart';
-import '../../features/daily_news/presentation/pages/home/daily_news.dart';
-import '../../features/daily_news/presentation/pages/saved_article/saved_article.dart';
 import '../../features/journalist_articles/presentation/bloc/published_articles/published_articles_cubit.dart';
-import '../../features/journalist_articles/presentation/bloc/saved_journalist_articles/saved_journalist_articles_cubit.dart';
-import '../../injection_container.dart';
 import '../../features/settings/presentation/screens/settings/settings_screen.dart';
 import 'app_bottom_navigation_bar.dart';
+import 'home_section.dart';
+import 'saved_section.dart';
 
 /// Main screen of the app: shows the section chosen in the bottom navigation bar.
 /// The home tabs ("Daily News" | "Journalists") live here so the + button can open "Journalists".
@@ -45,13 +43,9 @@ class _AppNavigationShellState extends State<AppNavigationShell> {
   Widget _buildSection() {
     switch (_currentSection) {
       case AppSection.home:
-        return const DailyNews();
+        return const HomeSection();
       case AppSection.saved:
-        // Created every time the section opens, so the saved articles are always up to date.
-        return BlocProvider<SavedJournalistArticlesCubit>(
-          create: (_) => sl()..loadSavedArticles(),
-          child: const SavedArticles(),
-        );
+        return const SavedSection();
       case AppSection.profile:
         return const ProfileScreen();
       case AppSection.settings:

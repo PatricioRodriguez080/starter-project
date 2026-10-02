@@ -2,9 +2,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:news_app_clean_architecture/core/resources/data_state.dart';
 import 'package:news_app_clean_architecture/features/daily_news/domain/entities/article.dart';
-import 'package:news_app_clean_architecture/features/daily_news/domain/usecases/is_article_saved.dart';
-import 'package:news_app_clean_architecture/features/daily_news/domain/usecases/remove_article.dart';
-import 'package:news_app_clean_architecture/features/daily_news/domain/usecases/save_article.dart';
+import 'package:news_app_clean_architecture/features/daily_news/domain/use_cases/is_article_saved.dart';
+import 'package:news_app_clean_architecture/features/daily_news/domain/use_cases/remove_article.dart';
+import 'package:news_app_clean_architecture/features/daily_news/domain/use_cases/save_article.dart';
 import 'package:news_app_clean_architecture/features/daily_news/presentation/bloc/article/bookmark/article_bookmark_cubit.dart';
 import 'package:news_app_clean_architecture/features/daily_news/presentation/bloc/article/bookmark/article_bookmark_state.dart';
 

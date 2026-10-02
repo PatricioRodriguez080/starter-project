@@ -2,9 +2,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:news_app_clean_architecture/core/resources/data_state.dart';
 
 import '../../../../domain/entities/article.dart';
-import '../../../../domain/usecases/is_article_saved.dart';
-import '../../../../domain/usecases/remove_article.dart';
-import '../../../../domain/usecases/save_article.dart';
+import '../../../../domain/use_cases/is_article_saved.dart';
+import '../../../../domain/use_cases/remove_article.dart';
+import '../../../../domain/use_cases/save_article.dart';
 import 'article_bookmark_state.dart';
 
 /// Bookmark of a news article from NewsAPI, saved on the phone.

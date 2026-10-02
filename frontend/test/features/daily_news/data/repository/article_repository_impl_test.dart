@@ -3,6 +3,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:news_app_clean_architecture/core/resources/data_state.dart';
 import 'package:news_app_clean_architecture/features/daily_news/data/data_sources/local/DAO/article_dao.dart';
 import 'package:news_app_clean_architecture/features/daily_news/data/data_sources/local/app_database.dart';
+import 'package:news_app_clean_architecture/features/daily_news/data/data_sources/local/saved_article_record.dart';
 import 'package:news_app_clean_architecture/features/daily_news/data/data_sources/remote/news_api_service.dart';
 import 'package:news_app_clean_architecture/features/daily_news/data/models/article.dart';
 import 'package:news_app_clean_architecture/features/daily_news/data/repository/article_repository_impl.dart';
@@ -14,8 +15,9 @@ class MockAppDatabase extends Mock implements AppDatabase {}
 
 class MockArticleDao extends Mock implements ArticleDao {}
 
-/// Saving the news on the phone (the database of the original app).
+/// The news from NewsAPI and saving them on the phone (the database of the original app).
 void main() {
+  late MockNewsApiService newsApiService;
   late MockArticleDao articleDao;
   late ArticleRepositoryImpl repository;
 
@@ -24,20 +26,63 @@ void main() {
     url: 'https://example.com/steelers',
     publishedAt: '2026-10-01T03:55:00Z',
   );
-  final savedArticle = ArticleModel.fromEntity(const ArticleEntity(
+  const savedArticle = SavedArticleRecord(
     id: 7,
     title: 'Steelers trade Joey Porter Jr. to the Cowboys',
     url: 'https://example.com/steelers',
     publishedAt: '2026-10-01T03:55:00Z',
-  ));
+  );
 
-  setUpAll(() => registerFallbackValue(ArticleModel.fromEntity(article)));
+  setUpAll(() => registerFallbackValue(const SavedArticleRecord()));
 
   setUp(() {
+    newsApiService = MockNewsApiService();
     articleDao = MockArticleDao();
     final database = MockAppDatabase();
     when(() => database.articleDAO).thenReturn(articleDao);
-    repository = ArticleRepositoryImpl(MockNewsApiService(), database);
+    repository = ArticleRepositoryImpl(newsApiService, database);
+  });
+
+  group('getNewsArticles', () {
+    void answerNewsApiWith(Future<List<ArticleModel>> Function(Invocation) answer) {
+      when(() => newsApiService.getNewsArticles(
+            apiKey: any(named: 'apiKey'),
+            country: any(named: 'country'),
+            category: any(named: 'category'),
+          )).thenAnswer(answer);
+    }
+
+    test('returns the news as entities, not models', () async {
+      answerNewsApiWith((_) async => [ArticleModel.fromEntity(article)]);
+
+      final dataState = await repository.getNewsArticles();
+
+      expect(dataState.data, [article]);
+      expect(dataState.data!.single, isNot(isA<ArticleModel>()));
+    });
+
+    test('returns a failure when the request fails', () async {
+      answerNewsApiWith((_) async => throw Exception('No connection'));
+
+      expect(await repository.getNewsArticles(), isA<DataFailed>());
+    });
+  });
+
+  group('getSavedArticles', () {
+    test('returns the saved articles as entities', () async {
+      when(() => articleDao.getArticles()).thenAnswer((_) async => [savedArticle]);
+
+      final dataState = await repository.getSavedArticles();
+
+      expect(dataState.data!.single.id, 7);
+      expect(dataState.data!.single, isNot(isA<ArticleModel>()));
+    });
+
+    test('returns a failure when the database cannot be read', () async {
+      when(() => articleDao.getArticles()).thenThrow(Exception('Database closed'));
+
+      expect(await repository.getSavedArticles(), isA<DataFailed>());
+    });
   });
 
   group('isArticleSaved', () {

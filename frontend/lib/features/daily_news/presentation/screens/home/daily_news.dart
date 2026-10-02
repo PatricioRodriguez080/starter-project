@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:news_app_clean_architecture/features/daily_news/presentation/bloc/article/remote/remote_article_bloc.dart';
 import 'package:news_app_clean_architecture/features/daily_news/presentation/bloc/article/remote/remote_article_state.dart';
-import 'package:news_app_clean_architecture/features/journalist_articles/presentation/screens/published_articles/published_articles_screen.dart';
 
 import '../../../../../config/theme/app_skeletons.dart';
 import '../../../domain/entities/article.dart';
@@ -19,36 +18,12 @@ final List<ArticleEntity> _loadingArticles = List.filled(
   ),
 );
 
-/// Home section: the news from NewsAPI and the journalists' articles, in two tabs.
-/// Its tab controller is provided by the app navigation, which also owns the + button.
+/// The news from NewsAPI: the "Daily News" tab of the Home section, which the app navigation builds.
 class DailyNews extends StatelessWidget {
   const DailyNews({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: _buildAppbar(),
-      body: TabBarView(
-        children: [
-          _buildDailyNewsTab(),
-          const PublishedArticlesScreen(),
-        ],
-      ),
-    );
-  }
-
-  PreferredSizeWidget _buildAppbar() {
-    return AppBar(
-      title: const Text('Daily News'),
-      bottom: const TabBar(
-        indicatorWeight: 3,
-        tabs: [
-          Tab(text: 'Daily News'),
-          Tab(text: 'Journalists'),
-        ],
-      ),
-    );
-  }
+  Widget build(BuildContext context) => _buildDailyNewsTab();
 
   Widget _buildDailyNewsTab() {
     return BlocBuilder<RemoteArticlesBloc, RemoteArticlesState>(

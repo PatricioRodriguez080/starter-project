@@ -115,10 +115,10 @@ class _$ArticleDao extends ArticleDao {
     this.database,
     this.changeListener,
   )   : _queryAdapter = QueryAdapter(database),
-        _articleModelInsertionAdapter = InsertionAdapter(
+        _savedArticleRecordInsertionAdapter = InsertionAdapter(
             database,
             'article',
-            (ArticleModel item) => <String, Object?>{
+            (SavedArticleRecord item) => <String, Object?>{
                   'id': item.id,
                   'author': item.author,
                   'title': item.title,
@@ -128,11 +128,11 @@ class _$ArticleDao extends ArticleDao {
                   'publishedAt': item.publishedAt,
                   'content': item.content
                 }),
-        _articleModelDeletionAdapter = DeletionAdapter(
+        _savedArticleRecordDeletionAdapter = DeletionAdapter(
             database,
             'article',
             ['id'],
-            (ArticleModel item) => <String, Object?>{
+            (SavedArticleRecord item) => <String, Object?>{
                   'id': item.id,
                   'author': item.author,
                   'title': item.title,
@@ -149,14 +149,15 @@ class _$ArticleDao extends ArticleDao {
 
   final QueryAdapter _queryAdapter;
 
-  final InsertionAdapter<ArticleModel> _articleModelInsertionAdapter;
+  final InsertionAdapter<SavedArticleRecord>
+      _savedArticleRecordInsertionAdapter;
 
-  final DeletionAdapter<ArticleModel> _articleModelDeletionAdapter;
+  final DeletionAdapter<SavedArticleRecord> _savedArticleRecordDeletionAdapter;
 
   @override
-  Future<List<ArticleModel>> getArticles() async {
+  Future<List<SavedArticleRecord>> getArticles() async {
     return _queryAdapter.queryList('SELECT * FROM article',
-        mapper: (Map<String, Object?> row) => ArticleModel(
+        mapper: (Map<String, Object?> row) => SavedArticleRecord(
             id: row['id'] as int?,
             author: row['author'] as String?,
             title: row['title'] as String?,
@@ -168,9 +169,9 @@ class _$ArticleDao extends ArticleDao {
   }
 
   @override
-  Future<ArticleModel?> findArticleByUrl(String url) async {
+  Future<SavedArticleRecord?> findArticleByUrl(String url) async {
     return _queryAdapter.query('SELECT * FROM article WHERE url = ?1',
-        mapper: (Map<String, Object?> row) => ArticleModel(
+        mapper: (Map<String, Object?> row) => SavedArticleRecord(
             id: row['id'] as int?,
             author: row['author'] as String?,
             title: row['title'] as String?,
@@ -189,13 +190,13 @@ class _$ArticleDao extends ArticleDao {
   }
 
   @override
-  Future<void> insertArticle(ArticleModel article) async {
-    await _articleModelInsertionAdapter.insert(
+  Future<void> insertArticle(SavedArticleRecord article) async {
+    await _savedArticleRecordInsertionAdapter.insert(
         article, OnConflictStrategy.abort);
   }
 
   @override
-  Future<void> deleteArticle(ArticleModel articleModel) async {
-    await _articleModelDeletionAdapter.delete(articleModel);
+  Future<void> deleteArticle(SavedArticleRecord article) async {
+    await _savedArticleRecordDeletionAdapter.delete(article);
   }
 }

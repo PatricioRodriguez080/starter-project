@@ -20,7 +20,7 @@ class NewsApiService {
     );
     final articles = response.data!['articles'] as List<dynamic>;
     return articles
-        .map((article) => ArticleModel.fromJson(article as Map<String, dynamic>))
+        .map((article) => ArticleModel.fromRawData(article as Map<String, dynamic>))
         .toList();
   }
 }

@@ -7,7 +7,7 @@ import '../../features/auth/presentation/screens/register/register_screen.dart';
 import '../../features/auth/presentation/screens/sign_in/sign_in_screen.dart';
 import '../../features/daily_news/domain/entities/article.dart';
 import '../../features/daily_news/presentation/bloc/article/bookmark/article_bookmark_cubit.dart';
-import '../../features/daily_news/presentation/pages/article_detail/article_detail.dart';
+import '../../features/daily_news/presentation/screens/article_detail/article_detail.dart';
 import '../../features/journalist_articles/domain/entities/journalist_article.dart';
 import '../../features/journalist_articles/presentation/bloc/add_article_comment/add_article_comment_cubit.dart';
 import '../../features/journalist_articles/presentation/bloc/article_comments/article_comments_cubit.dart';

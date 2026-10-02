@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:news_app_clean_architecture/features/journalist_articles/presentation/screens/saved_journalist_articles/saved_journalist_articles_screen.dart';
 import '../../../../../config/theme/app_skeletons.dart';
 import '../../../../../config/theme/app_themes.dart';
 import '../../../../../config/theme/app_toasts.dart';
-import '../../../../../injection_container.dart';
 import '../../../domain/entities/article.dart';
 import '../../bloc/article/local/local_article_bloc.dart';
 import '../../bloc/article/local/local_article_event.dart';
@@ -23,50 +20,21 @@ final List<ArticleEntity> _loadingArticles = List.filled(
   ),
 );
 
-/// Saved section: the news saved on the phone and the journalists' articles saved in the account, in two tabs
-/// like the home section.
-class SavedArticles extends HookWidget {
+/// The news saved on the phone: the "Daily News" tab of the Saved section, which the app navigation builds
+/// with the [LocalArticleBloc].
+class SavedArticles extends StatelessWidget {
   const SavedArticles({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => sl<LocalArticleBloc>()..add(const GetSavedArticles()),
-      child: DefaultTabController(
-        length: 2,
-        child: Scaffold(
-          appBar: _buildAppBar(),
-          body: TabBarView(
-            children: [
-              _buildSavedNews(),
-              const SavedJournalistArticlesScreen(),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  /// A section of the bottom navigation bar, so it has no back button.
-  PreferredSizeWidget _buildAppBar() {
-    return AppBar(
-      automaticallyImplyLeading: false,
-      title: const Text('Saved Articles'),
-      bottom: const TabBar(
-        indicatorWeight: 3,
-        tabs: [
-          Tab(text: 'Daily News'),
-          Tab(text: 'Journalists'),
-        ],
-      ),
-    );
-  }
+  Widget build(BuildContext context) => _buildSavedNews();
 
   Widget _buildSavedNews() {
     return BlocBuilder<LocalArticleBloc, LocalArticlesState>(
       builder: (context, state) {
         if (state is LocalArticlesLoading) {
           return AppSkeletonizer(child: _buildArticlesList(context, _loadingArticles));
+        } else if (state is LocalArticlesError) {
+          return const Center(child: Icon(Icons.refresh));
         } else if (state is LocalArticlesDone) {
           return _buildArticlesList(context, state.articles!);
         }

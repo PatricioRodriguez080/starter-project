@@ -1,38 +1,30 @@
-import 'package:floor/floor.dart';
 import 'package:news_app_clean_architecture/features/daily_news/domain/entities/article.dart';
 import '../../../../core/constants/constants.dart';
 
-@Entity(tableName: 'article',primaryKeys: ['id'])
+/// A news article as NewsAPI sends it, or as it is saved on the phone.
 class ArticleModel extends ArticleEntity {
   const ArticleModel({
-    int ? id,
-    String ? author,
-    String ? title,
-    String ? description,
-    String ? url,
-    String ? urlToImage,
-    String ? publishedAt,
-    String ? content,
-  }): super(
-    id: id,
-    author: author,
-    title: title,
-    description: description,
-    url: url,
-    urlToImage: urlToImage,
-    publishedAt: publishedAt,
-    content: content,
-  );
+    super.id,
+    super.author,
+    super.title,
+    super.description,
+    super.url,
+    super.urlToImage,
+    super.publishedAt,
+    super.content,
+  });
 
-  factory ArticleModel.fromJson(Map < String, dynamic > map) {
+  /// Parses an article from the NewsAPI response.
+  factory ArticleModel.fromRawData(Map<String, dynamic> rawData) {
+    final urlToImage = rawData['urlToImage'];
     return ArticleModel(
-      author: map['author'] ?? "",
-      title: map['title'] ?? "",
-      description: map['description'] ?? "",
-      url: map['url'] ?? "",
-      urlToImage: map['urlToImage'] != null && map['urlToImage'] != "" ? map['urlToImage'] : kDefaultImage,
-      publishedAt: map['publishedAt'] ?? "",
-      content: map['content'] ?? "",
+      author: rawData['author'] ?? '',
+      title: rawData['title'] ?? '',
+      description: rawData['description'] ?? '',
+      url: rawData['url'] ?? '',
+      urlToImage: urlToImage != null && urlToImage != '' ? urlToImage : kDefaultImage,
+      publishedAt: rawData['publishedAt'] ?? '',
+      content: rawData['content'] ?? '',
     );
   }
 
@@ -45,7 +37,20 @@ class ArticleModel extends ArticleEntity {
       url: entity.url,
       urlToImage: entity.urlToImage,
       publishedAt: entity.publishedAt,
-      content: entity.content
+      content: entity.content,
+    );
+  }
+
+  ArticleEntity toEntity() {
+    return ArticleEntity(
+      id: id,
+      author: author,
+      title: title,
+      description: description,
+      url: url,
+      urlToImage: urlToImage,
+      publishedAt: publishedAt,
+      content: content,
     );
   }
 }
