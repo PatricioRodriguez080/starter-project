@@ -5,9 +5,11 @@ service firebase.storage {
   match /b/{bucket}/o {
 
     match /media/articles/{fileName} {
-      allow read: if true;
+      allow read: if request.auth != null;
       // Uploading over an existing file is evaluated as a create, so it is blocked explicitly.
-      allow create: if resource == null && isValidThumbnail(fileName, request.resource);
+      allow create: if request.auth != null
+        && resource == null
+        && isValidThumbnail(fileName, request.resource);
       // Thumbnails are immutable, like the articles they belong to.
       allow update, delete: if false;
     }

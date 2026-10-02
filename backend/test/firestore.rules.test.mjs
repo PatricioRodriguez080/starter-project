@@ -18,13 +18,17 @@ import {
 const PROJECT_ID = 'demo-symmetry-news';
 const ARTICLE_ID = 'Xy7Qp2LmT9aB3cD4eF5g';
 const STORAGE_BUCKET = 'symmetry-news-1d028.firebasestorage.app';
+const AUTHOR_ID = 'janeDoeUid';
+const AUTHOR_NAME = 'Jane Doe';
 
 const testEnvironment = await initializeTestEnvironment({
   projectId: PROJECT_ID,
   firestore: { rules: readFileSync('firestore.rules', 'utf8') },
 });
 
-const database = testEnvironment.unauthenticatedContext().firestore();
+// The journalist signed in to the app; the token carries the name of the account.
+const database = testEnvironment.authenticatedContext(AUTHOR_ID, { name: AUTHOR_NAME }).firestore();
+const anonymousDatabase = testEnvironment.unauthenticatedContext().firestore();
 
 function buildThumbnailURL({
   host = 'https://firebasestorage.googleapis.com',
@@ -42,7 +46,8 @@ function buildValidArticle(overrides = {}) {
     title: 'Local startup brings clean water to 10,000 homes',
     description: 'A team of engineers has designed a low-cost filter.',
     content: 'When the first prototype was installed last spring...\n\nIt worked.',
-    author: 'Jane Doe',
+    author: AUTHOR_NAME,
+    authorId: AUTHOR_ID,
     thumbnailURL: buildThumbnailURL(),
     publishedAt: serverTimestamp(),
     ...overrides,
@@ -64,9 +69,14 @@ beforeEach(() => testEnvironment.clearFirestore());
 after(() => testEnvironment.cleanup());
 
 describe('articles: read', () => {
-  test('anyone can read an article', async () => {
+  test('a signed-in user can read an article', async () => {
     await seedArticleBypassingRules();
     await assertSucceeds(getDoc(doc(database, 'articles', ARTICLE_ID)));
+  });
+
+  test('rejects reading articles without signing in', async () => {
+    await seedArticleBypassingRules();
+    await assertFails(getDoc(doc(anonymousDatabase, 'articles', ARTICLE_ID)));
   });
 });
 
@@ -89,7 +99,24 @@ describe('articles: create', () => {
     });
   }
 
-  for (const field of ['title', 'description', 'content', 'author', 'thumbnailURL', 'publishedAt']) {
+  test('rejects publishing without signing in', async () => {
+    await assertFails(setDoc(doc(anonymousDatabase, 'articles', ARTICLE_ID), buildValidArticle()));
+  });
+
+  test('rejects an article published in the name of another account', async () => {
+    await assertFails(createArticle(buildValidArticle({ authorId: 'someoneElseUid' })));
+  });
+
+  test('rejects an author name that is not the name of the account', async () => {
+    await assertFails(createArticle(buildValidArticle({ author: 'John Smith' })));
+  });
+
+  test('rejects publishing from an account without a name', async () => {
+    const namelessDatabase = testEnvironment.authenticatedContext(AUTHOR_ID).firestore();
+    await assertFails(setDoc(doc(namelessDatabase, 'articles', ARTICLE_ID), buildValidArticle()));
+  });
+
+  for (const field of ['title', 'description', 'content', 'author', 'authorId', 'thumbnailURL', 'publishedAt']) {
     test(`rejects an article without ${field}`, async () => {
       const article = buildValidArticle();
       delete article[field];
@@ -105,7 +132,7 @@ describe('articles: create', () => {
     await assertFails(createArticle(buildValidArticle(), 'not.a-valid_id'));
   });
 
-  const textFieldLimits = { title: 150, description: 300, content: 20000, author: 100 };
+  const textFieldLimits = { title: 150, description: 300, content: 20000 };
 
   for (const [field, maxLength] of Object.entries(textFieldLimits)) {
     test(`accepts a ${field} of exactly ${maxLength} characters`, async () => {

@@ -16,7 +16,9 @@ const testEnvironment = await initializeTestEnvironment({
   storage: { rules: readFileSync('storage.rules', 'utf8') },
 });
 
-const storage = testEnvironment.unauthenticatedContext().storage();
+// The journalist signed in to the app.
+const storage = testEnvironment.authenticatedContext('janeDoeUid', { name: 'Jane Doe' }).storage();
+const anonymousStorage = testEnvironment.unauthenticatedContext().storage();
 
 function uploadFile(path, { sizeInBytes = 1024, contentType = 'image/png' } = {}) {
   return uploadBytes(ref(storage, path), new Uint8Array(sizeInBytes), { contentType });
@@ -43,13 +45,23 @@ beforeEach(() => clearAllStorage());
 after(() => testEnvironment.cleanup());
 
 describe('media/articles: read', () => {
-  test('anyone can read a thumbnail', async () => {
+  test('a signed-in user can read a thumbnail', async () => {
     await seedThumbnailBypassingRules();
     await assertSucceeds(getBytes(ref(storage, THUMBNAIL_PATH)));
+  });
+
+  test('rejects reading a thumbnail without signing in', async () => {
+    await seedThumbnailBypassingRules();
+    await assertFails(getBytes(ref(anonymousStorage, THUMBNAIL_PATH)));
   });
 });
 
 describe('media/articles: create', () => {
+  test('rejects uploading a thumbnail without signing in', async () => {
+    const bytes = new Uint8Array(1024);
+    await assertFails(uploadBytes(ref(anonymousStorage, THUMBNAIL_PATH), bytes, { contentType: 'image/png' }));
+  });
+
   for (const [extension, contentType] of [['jpg', 'image/jpeg'], ['jpeg', 'image/jpeg'], ['png', 'image/png'], ['webp', 'image/webp']]) {
     test(`accepts a ${contentType} thumbnail named {articleId}.${extension}`, async () => {
       await assertSucceeds(uploadFile(`media/articles/Xy7Qp2LmT9aB3cD4eF5g.${extension}`, { contentType }));

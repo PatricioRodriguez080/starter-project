@@ -9,6 +9,11 @@ The schema of the *Articles* (Firestore collection `articles` and Cloud Storage 
 Before starting to work on the backend, you must have a Firebase project with the [Firebase Firestore](https://firebase.google.com/docs/firestore), [Firebase Cloud Storage](https://firebase.google.com/docs/storage) and [Firebase Local Emulator Suite](https://firebase.google.com/docs/emulator-suite) technologies enabled.
 To do this, create a project but enable only Firebase Cloud Storage, Firebase Firestore, and Firebase Local Emulator Suite technologies.
 
+> **Firebase Authentication**: the journalists sign in to the app with an email and a password, so the project also
+> uses Firebase Authentication (free on every plan). In the Firebase console, go to **Authentication → Sign-in method**
+> and enable **Email/Password**. The Local Emulator Suite includes an Authentication emulator, so nothing else is needed
+> to work locally. See the [schema](docs/DB_SCHEMA.md) for why it was added.
+
 
 ## Deploying the Project
 In order to deploy the Firestore rules from this repository to the [Firebase console](https://firebase.google.com/)  of your project, follow these steps:
@@ -49,7 +54,9 @@ Be careful becasuse it will overwrite the existing firestore.rules file of your 
 > indexes with `firebase deploy --only firestore`. On a Blaze project, `firebase deploy` also deploys `storage.rules`.
 
 ## Running the project in a local emulator
-To run the application locally, use the following command:
+The emulators do not need a Firebase account nor `firebase login` (the CLI only warns that you are not authenticated),
+but they require Java 21 and the [Firebase CLI](#1-install-firebase-cli). To run the application locally, use the
+following command:
 
 ```firebase emulators:start```
 
@@ -60,13 +67,16 @@ npm run emulators
 ```
 
 ### Seeding the emulator with sample articles
-The first time, the emulator starts empty. To create the `articles` collection with sample articles and their thumbnails in
-`media/articles`, install the dependencies once and, with the emulators running, run the seed script in another terminal:
+The first time, the emulator starts empty. To create two demo journalist accounts and the `articles` collection with sample
+articles and their thumbnails in `media/articles`, install the dependencies once and, with the emulators running, run the
+seed script in another terminal:
 ```
 npm install
 npm run seed
 ```
-The script writes through `firestore.rules` and `storage.rules`, so the sample data always follows the [schema](docs/DB_SCHEMA.md).
+The script publishes each article signed in as its author and writes through `firestore.rules` and `storage.rules`, so the
+sample data always follows the [schema](docs/DB_SCHEMA.md). The demo accounts (emulator only) are listed in
+`scripts/seed-data/users.json`; you can sign in to the app with any of them.
 
 ## Testing the rules
 `firestore.rules` and `storage.rules` are covered by tests in the `test` folder

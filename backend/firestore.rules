@@ -5,11 +5,16 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     match /articles/{articleId} {
-      allow read: if true;
-      allow create: if isValidArticleId(articleId)
+      allow read: if isSignedIn();
+      allow create: if isSignedIn()
+        && isValidArticleId(articleId)
         && isValidArticle(request.resource.data, articleId);
-      // Articles are immutable: without authentication nobody can prove to be their author.
+      // Articles are immutable: editing and deleting them is left as a future improvement.
       allow update, delete: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
     }
 
     function isValidArticleId(articleId) {
@@ -21,14 +26,21 @@ service cloud.firestore {
         && isNonBlankStringUpTo(article.title, 150)
         && isNonBlankStringUpTo(article.description, 300)
         && isNonBlankStringUpTo(article.content, 20000)
-        && isNonBlankStringUpTo(article.author, 100)
+        && isWrittenByTheSignedInUser(article)
         && isArticleThumbnailURL(article.thumbnailURL, articleId)
         && article.publishedAt == request.time;
     }
 
     function hasExactlyArticleFields(article) {
-      let fields = ['title', 'description', 'content', 'author', 'thumbnailURL', 'publishedAt'];
+      let fields = ['title', 'description', 'content', 'author', 'authorId', 'thumbnailURL', 'publishedAt'];
       return article.keys().hasAll(fields) && article.keys().hasOnly(fields);
+    }
+
+    // The author is the account that publishes the article: its ID and the name of the account.
+    function isWrittenByTheSignedInUser(article) {
+      return article.authorId == request.auth.uid
+        && isNonBlankStringUpTo(article.author, 100)
+        && article.author == request.auth.token.name;
     }
 
     function isNonBlankStringUpTo(value, maxLength) {
