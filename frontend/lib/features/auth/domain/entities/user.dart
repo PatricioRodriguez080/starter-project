@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:news_app_clean_architecture/core/util/initials.dart';
 
 /// Journalist signed in to the app.
 class UserEntity extends Equatable {
@@ -8,13 +9,11 @@ class UserEntity extends Equatable {
 
   const UserEntity({required this.id, required this.name, required this.email});
 
-  /// Up to two letters for the avatar: "Jane Doe" → "JD", "Jane" → "J".
-  /// Without a name, the first letter of the email is used.
+  /// Letters for the avatar: "Jane Doe" → "JD". Without a name, the first letter of the email is used.
   String get initials {
-    final words = name.trim().split(RegExp(r'\s+')).where((word) => word.isNotEmpty).toList();
-    if (words.isEmpty) return email.isEmpty ? '?' : email[0].toUpperCase();
-    final firstWords = words.length == 1 ? words : [words.first, words.last];
-    return firstWords.map((word) => word[0].toUpperCase()).join();
+    final nameInitials = initialsOf(name);
+    if (nameInitials.isNotEmpty) return nameInitials;
+    return email.isEmpty ? '?' : email[0].toUpperCase();
   }
 
   @override

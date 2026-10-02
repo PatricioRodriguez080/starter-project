@@ -10,8 +10,10 @@ class PublishedArticlesCubit extends Cubit<PublishedArticlesState> {
   PublishedArticlesCubit(this._getPublishedArticlesUseCase)
       : super(const PublishedArticlesInProgress());
 
+  /// When refreshing (e.g. to update the comment counts), the articles already shown stay on screen
+  /// until the new ones arrive, instead of turning back into the loading skeleton.
   Future<void> loadArticles() async {
-    emit(const PublishedArticlesInProgress());
+    if (state is! PublishedArticlesSuccess) emit(const PublishedArticlesInProgress());
     final dataState = await _getPublishedArticlesUseCase();
     if (dataState is DataSuccess) {
       emit(PublishedArticlesSuccess(dataState.data!));

@@ -13,6 +13,9 @@ class JournalistArticleEntity extends Equatable {
   final String thumbnailURL;
   final DateTime publishedAt;
 
+  /// How many comments the article has. It is counted when the articles are read, not stored in the article.
+  final int commentCount;
+
   const JournalistArticleEntity({
     required this.id,
     required this.title,
@@ -22,9 +25,10 @@ class JournalistArticleEntity extends Equatable {
     required this.authorId,
     required this.thumbnailURL,
     required this.publishedAt,
+    this.commentCount = 0,
   });
 
   @override
   List<Object?> get props =>
-      [id, title, description, content, author, authorId, thumbnailURL, publishedAt];
+      [id, title, description, content, author, authorId, thumbnailURL, publishedAt, commentCount];
 }

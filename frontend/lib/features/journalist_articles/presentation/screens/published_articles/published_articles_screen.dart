@@ -67,8 +67,10 @@ class PublishedArticlesScreen extends StatelessWidget {
     );
   }
 
-  void _onArticlePressed(BuildContext context, JournalistArticleEntity article) {
-    Navigator.pushNamed(context, '/JournalistArticleDetails', arguments: article);
+  /// When the journalist comes back, the articles are read again, so their comment counts are up to date.
+  Future<void> _onArticlePressed(BuildContext context, JournalistArticleEntity article) async {
+    await Navigator.pushNamed(context, '/JournalistArticleDetails', arguments: article);
+    if (context.mounted) context.read<PublishedArticlesCubit>().loadArticles();
   }
 }
 

@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:news_app_clean_architecture/config/theme/app_themes.dart';
 
+/// "Oct 2, 2026 · 09:41", in the phone's time zone.
+String formatPublicationDate(DateTime date) => DateFormat('MMM d, y · HH:mm').format(date.toLocal());
+
 class PublicationDateText extends StatelessWidget {
   final DateTime publishedAt;
 
@@ -15,7 +18,7 @@ class PublicationDateText extends StatelessWidget {
         Icon(Icons.schedule, size: 14, color: palette.textSecondary),
         const SizedBox(width: 4),
         Text(
-          DateFormat('MMM d, y · HH:mm').format(publishedAt.toLocal()),
+          formatPublicationDate(publishedAt),
           style: TextStyle(fontSize: 12, color: palette.textSecondary),
         ),
       ],

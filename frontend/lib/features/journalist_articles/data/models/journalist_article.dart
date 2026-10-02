@@ -12,9 +12,11 @@ class JournalistArticleModel extends JournalistArticleEntity {
     required super.authorId,
     required super.thumbnailURL,
     required super.publishedAt,
+    super.commentCount,
   });
 
-  /// [rawData] holds the document fields with `publishedAt` already converted to a [DateTime].
+  /// [rawData] holds the document fields with `publishedAt` already converted to a [DateTime], plus the
+  /// `commentCount` counted by the data source (0 when it is missing, as for a new article).
   factory JournalistArticleModel.fromRawData(String id, Map<String, dynamic> rawData) {
     return JournalistArticleModel(
       id: id,
@@ -25,6 +27,7 @@ class JournalistArticleModel extends JournalistArticleEntity {
       authorId: rawData['authorId'] as String,
       thumbnailURL: rawData['thumbnailURL'] as String,
       publishedAt: rawData['publishedAt'] as DateTime,
+      commentCount: rawData['commentCount'] as int? ?? 0,
     );
   }
 
@@ -49,6 +52,7 @@ class JournalistArticleModel extends JournalistArticleEntity {
       authorId: authorId,
       thumbnailURL: thumbnailURL,
       publishedAt: publishedAt,
+      commentCount: commentCount,
     );
   }
 }

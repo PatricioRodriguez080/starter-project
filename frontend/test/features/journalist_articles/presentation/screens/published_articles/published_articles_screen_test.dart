@@ -29,6 +29,7 @@ void main() {
       authorId: 'janeDoeUid',
       thumbnailURL: '',
       publishedAt: DateTime.utc(2026, 10, 1),
+      commentCount: 3,
     ),
   ];
 
@@ -69,5 +70,16 @@ void main() {
 
     expect(find.byType(AppSkeletonizer), findsNothing);
     expect(find.text('Published from the Android emulator'), findsOneWidget);
+  });
+
+  testWidgets('shows how many comments each article has', (tester) async {
+    when(() => getPublishedArticles()).thenAnswer((_) async => DataSuccess(articles));
+
+    await showPublishedArticles(tester);
+    await cubit.loadArticles();
+    await tester.pump();
+
+    // The tile reads all its texts as one label, so the comments are part of it.
+    expect(find.bySemanticsLabel(RegExp('3 comments')), findsOneWidget);
   });
 }

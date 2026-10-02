@@ -21,15 +21,22 @@ import 'features/daily_news/domain/usecases/remove_article.dart';
 import 'features/daily_news/domain/usecases/save_article.dart';
 import 'features/daily_news/presentation/bloc/article/local/local_article_bloc.dart';
 import 'features/journalist_articles/data/data_sources/local/article_thumbnail_gallery_data_source.dart';
+import 'features/journalist_articles/data/data_sources/remote/article_comment_remote_data_source.dart';
 import 'features/journalist_articles/data/data_sources/remote/article_thumbnail_remote_data_source.dart';
 import 'features/journalist_articles/data/data_sources/remote/journalist_article_remote_data_source.dart';
+import 'features/journalist_articles/data/repository/article_comment_repository_impl.dart';
 import 'features/journalist_articles/data/repository/article_thumbnail_repository_impl.dart';
 import 'features/journalist_articles/data/repository/journalist_article_repository_impl.dart';
+import 'features/journalist_articles/domain/repository/article_comment_repository.dart';
 import 'features/journalist_articles/domain/repository/article_thumbnail_repository.dart';
 import 'features/journalist_articles/domain/repository/journalist_article_repository.dart';
+import 'features/journalist_articles/domain/use_cases/add_article_comment.dart';
+import 'features/journalist_articles/domain/use_cases/get_article_comments.dart';
 import 'features/journalist_articles/domain/use_cases/get_published_articles.dart';
 import 'features/journalist_articles/domain/use_cases/pick_article_thumbnail.dart';
 import 'features/journalist_articles/domain/use_cases/publish_article.dart';
+import 'features/journalist_articles/presentation/bloc/add_article_comment/add_article_comment_cubit.dart';
+import 'features/journalist_articles/presentation/bloc/article_comments/article_comments_cubit.dart';
 import 'features/journalist_articles/presentation/bloc/publish_article/publish_article_cubit.dart';
 import 'features/journalist_articles/presentation/bloc/published_articles/published_articles_cubit.dart';
 import 'features/settings/data/data_sources/local/settings_local_data_source.dart';
@@ -118,17 +125,26 @@ void _initializeJournalistArticlesDependencies() {
   sl.registerSingleton<JournalistArticleRemoteDataSource>(JournalistArticleRemoteDataSourceImpl());
   sl.registerSingleton<ArticleThumbnailRemoteDataSource>(ArticleThumbnailRemoteDataSourceImpl());
   sl.registerSingleton<ArticleThumbnailGalleryDataSource>(ArticleThumbnailGalleryDataSourceImpl());
+  sl.registerSingleton<ArticleCommentRemoteDataSource>(ArticleCommentRemoteDataSourceImpl());
 
   //Repositories
   sl.registerSingleton<JournalistArticleRepository>(JournalistArticleRepositoryImpl(sl(), sl()));
   sl.registerSingleton<ArticleThumbnailRepository>(ArticleThumbnailRepositoryImpl(sl()));
+  sl.registerSingleton<ArticleCommentRepository>(ArticleCommentRepositoryImpl(sl()));
 
   //UseCases
   sl.registerSingleton<GetPublishedArticlesUseCase>(GetPublishedArticlesUseCase(sl()));
   sl.registerSingleton<PublishArticleUseCase>(PublishArticleUseCase(sl()));
   sl.registerSingleton<PickArticleThumbnailUseCase>(PickArticleThumbnailUseCase(sl()));
+  sl.registerSingleton<GetArticleCommentsUseCase>(GetArticleCommentsUseCase(sl()));
+  sl.registerSingleton<AddArticleCommentUseCase>(AddArticleCommentUseCase(sl()));
 
   //Cubits
   sl.registerFactory<PublishedArticlesCubit>(() => PublishedArticlesCubit(sl()));
   sl.registerFactory<PublishArticleCubit>(() => PublishArticleCubit(sl(), sl()));
+  // Created for each article: their parameter is the ID of the article.
+  sl.registerFactoryParam<ArticleCommentsCubit, String, void>((articleId, _) => ArticleCommentsCubit(sl(), articleId));
+  sl.registerFactoryParam<AddArticleCommentCubit, String, void>(
+    (articleId, _) => AddArticleCommentCubit(sl(), articleId),
+  );
 }

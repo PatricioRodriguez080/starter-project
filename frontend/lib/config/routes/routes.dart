@@ -8,6 +8,8 @@ import '../../features/auth/presentation/screens/sign_in/sign_in_screen.dart';
 import '../../features/daily_news/domain/entities/article.dart';
 import '../../features/daily_news/presentation/pages/article_detail/article_detail.dart';
 import '../../features/journalist_articles/domain/entities/journalist_article.dart';
+import '../../features/journalist_articles/presentation/bloc/add_article_comment/add_article_comment_cubit.dart';
+import '../../features/journalist_articles/presentation/bloc/article_comments/article_comments_cubit.dart';
 import '../../features/journalist_articles/presentation/bloc/publish_article/publish_article_cubit.dart';
 import '../../features/journalist_articles/presentation/screens/journalist_article_detail/journalist_article_detail_screen.dart';
 import '../../features/journalist_articles/presentation/screens/publish_article/publish_article_screen.dart';
@@ -42,13 +44,21 @@ class AppRoutes {
         ));
 
       case '/JournalistArticleDetails':
-        return _materialRoute(JournalistArticleDetailScreen(
-          article: settings.arguments as JournalistArticleEntity,
-        ));
+        return _materialRoute(_buildJournalistArticleDetails(settings.arguments as JournalistArticleEntity));
 
       default:
         return _materialRoute(const AuthGate());
     }
+  }
+
+  static Widget _buildJournalistArticleDetails(JournalistArticleEntity article) {
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (_) => sl<ArticleCommentsCubit>(param1: article.id)..loadComments()),
+        BlocProvider(create: (_) => sl<AddArticleCommentCubit>(param1: article.id)),
+      ],
+      child: JournalistArticleDetailScreen(article: article),
+    );
   }
 
   static Route<dynamic> _materialRoute(Widget view) {

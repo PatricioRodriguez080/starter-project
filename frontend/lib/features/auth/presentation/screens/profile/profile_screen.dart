@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:news_app_clean_architecture/config/theme/app_themes.dart';
+import 'package:news_app_clean_architecture/config/theme/user_avatar.dart';
 import 'package:news_app_clean_architecture/features/auth/domain/entities/user.dart';
 import 'package:news_app_clean_architecture/features/auth/presentation/bloc/session/session_cubit.dart';
 import 'package:news_app_clean_architecture/features/auth/presentation/bloc/session/session_state.dart';
-import 'package:news_app_clean_architecture/features/auth/presentation/widgets/user_avatar.dart';
 
 /// Account of the signed-in journalist, with the button to log out.
 class ProfileScreen extends StatelessWidget {

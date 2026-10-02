@@ -47,6 +47,29 @@ void main() {
     await states;
   });
 
+  test('refreshes the articles without going back to the loading skeleton', () async {
+    when(() => getPublishedArticles()).thenAnswer((_) async => DataSuccess(articles));
+    await cubit.loadArticles();
+    final articlesWithAComment = [
+      JournalistArticleEntity(
+        id: 'article1',
+        title: articles.single.title,
+        description: articles.single.description,
+        content: articles.single.content,
+        author: articles.single.author,
+        authorId: articles.single.authorId,
+        thumbnailURL: articles.single.thumbnailURL,
+        publishedAt: articles.single.publishedAt,
+        commentCount: 1,
+      ),
+    ];
+    when(() => getPublishedArticles()).thenAnswer((_) async => DataSuccess(articlesWithAComment));
+
+    final states = expectLater(cubit.stream, emitsInOrder([PublishedArticlesSuccess(articlesWithAComment)]));
+    await cubit.loadArticles();
+    await states;
+  });
+
   test('shows a failure when the articles cannot be loaded', () async {
     final error = Exception('No connection');
     when(() => getPublishedArticles()).thenAnswer((_) async => DataFailed(error));

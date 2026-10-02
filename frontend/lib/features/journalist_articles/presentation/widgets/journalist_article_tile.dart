@@ -4,6 +4,7 @@ import 'package:news_app_clean_architecture/config/theme/app_skeletons.dart';
 import 'package:news_app_clean_architecture/config/theme/app_themes.dart';
 import 'package:news_app_clean_architecture/features/journalist_articles/domain/entities/journalist_article.dart';
 
+import 'comment_count.dart';
 import 'publication_date_text.dart';
 
 class JournalistArticleTile extends StatelessWidget {
@@ -60,7 +61,7 @@ class JournalistArticleTile extends StatelessWidget {
     );
   }
 
-  /// Fills the height of the image, with the author and the date aligned to its bottom edge.
+  /// Fills the height of the image, with the author, the date and the comments aligned to its bottom edge.
   Widget _buildTexts(AppPalette palette) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -86,7 +87,13 @@ class JournalistArticleTile extends StatelessWidget {
           style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
         ),
         const SizedBox(height: 6),
-        PublicationDateText(publishedAt: article.publishedAt),
+        Row(
+          children: [
+            Expanded(child: PublicationDateText(publishedAt: article.publishedAt)),
+            const SizedBox(width: 8),
+            CommentCount(count: article.commentCount),
+          ],
+        ),
       ],
     );
   }

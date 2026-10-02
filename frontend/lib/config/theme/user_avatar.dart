@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:news_app_clean_architecture/config/theme/app_themes.dart';
 
-/// Circle with the initials of the journalist's name.
+import 'app_themes.dart';
+
+/// Circle with the initials of a journalist's name. Large avatars float on a soft shadow.
 class UserAvatar extends StatelessWidget {
   final String initials;
   final double size;
+  final bool hasShadow;
 
-  const UserAvatar({super.key, required this.initials, this.size = 96});
+  const UserAvatar({super.key, required this.initials, this.size = 96, this.hasShadow = true});
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +21,8 @@ class UserAvatar extends StatelessWidget {
         color: palette.primary,
         shape: BoxShape.circle,
         boxShadow: [
-          BoxShadow(color: palette.primary.withValues(alpha: 0.25), blurRadius: 20, offset: const Offset(0, 8)),
+          if (hasShadow)
+            BoxShadow(color: palette.primary.withValues(alpha: 0.25), blurRadius: 20, offset: const Offset(0, 8)),
         ],
       ),
       child: Text(

@@ -1,8 +1,8 @@
 import 'dart:math' as math;
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
+import '../theme/app_glass_pill.dart';
 import '../theme/app_themes.dart';
 
 enum AppSection { home, saved, profile, settings }
@@ -12,7 +12,6 @@ class AppBottomNavigationBar extends StatelessWidget {
   static const double height = 64;
   static const double _sideMargin = 16;
   static const double _minimumBottomMargin = 12;
-  static final BorderRadius _pillShape = BorderRadius.circular(height / 2);
 
   final AppSection currentSection;
   final ValueChanged<AppSection> onSectionSelected;
@@ -27,7 +26,6 @@ class AppBottomNavigationBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final palette = context.palette;
     // Rests right on top of the area the phone keeps for its gesture bar (its swipes must not
     // reach the buttons), and never closer than 12 px to the bottom edge.
     final bottomMargin = math.max(MediaQuery.paddingOf(context).bottom, _minimumBottomMargin);
@@ -35,34 +33,10 @@ class AppBottomNavigationBar extends StatelessWidget {
       padding: EdgeInsets.only(bottom: bottomMargin),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: _sideMargin),
-        child: DecoratedBox(
-          // The shadow is drawn outside the clipped glass, so the pill looks like it floats.
-          decoration: BoxDecoration(
-            borderRadius: _pillShape,
-            boxShadow: [
-              BoxShadow(color: palette.navigationShadow, blurRadius: 30, offset: const Offset(0, 10)),
-            ],
-          ),
-          child: ClipRRect(
-            borderRadius: _pillShape,
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: palette.navigationBar,
-                  borderRadius: _pillShape,
-                  border: Border.all(color: palette.navigationBorder),
-                ),
-                child: SizedBox(
-                  height: height,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10),
-                    child: _buildButtons(),
-                  ),
-                ),
-              ),
-            ),
-          ),
+        child: AppGlassPill(
+          height: height,
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          child: _buildButtons(),
         ),
       ),
     );

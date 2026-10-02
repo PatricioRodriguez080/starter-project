@@ -1,9 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:news_app_clean_architecture/features/journalist_articles/data/data_sources/remote/signed_in_journalist.dart';
 import 'package:news_app_clean_architecture/features/journalist_articles/data/models/journalist_article.dart';
 
 abstract class JournalistArticleRemoteDataSource {
-  /// Published articles, newest first.
+  /// Published articles, newest first, each one with the number of comments it has.
   Future<List<JournalistArticleModel>> getPublishedArticles();
 
   /// Generates the ID of a new article without creating it, so its thumbnail can be named after it.
@@ -14,14 +15,10 @@ abstract class JournalistArticleRemoteDataSource {
   Future<JournalistArticleModel> createArticle(String articleId, Map<String, dynamic> rawData);
 }
 
-/// Thrown when trying to publish an article while nobody is signed in.
-class NoSignedInJournalistException implements Exception {
-  const NoSignedInJournalistException();
-}
-
 /// Throws a [FirebaseException] when Firestore cannot complete a request.
 class JournalistArticleRemoteDataSourceImpl implements JournalistArticleRemoteDataSource {
   static const String _collectionPath = 'articles';
+  static const String _commentsCollectionPath = 'comments';
 
   final FirebaseFirestore _firestore;
   final FirebaseAuth _auth;
@@ -35,7 +32,7 @@ class JournalistArticleRemoteDataSourceImpl implements JournalistArticleRemoteDa
   @override
   Future<List<JournalistArticleModel>> getPublishedArticles() async {
     final snapshot = await _articles.orderBy('publishedAt', descending: true).get();
-    return snapshot.docs.map(_toModel).toList();
+    return Future.wait(snapshot.docs.map(_toModelWithCommentCount));
   }
 
   @override
@@ -44,20 +41,26 @@ class JournalistArticleRemoteDataSourceImpl implements JournalistArticleRemoteDa
   @override
   Future<JournalistArticleModel> createArticle(String articleId, Map<String, dynamic> rawData) async {
     final document = _articles.doc(articleId);
-    await document.set({...rawData, ..._authorRawData(), 'publishedAt': FieldValue.serverTimestamp()});
+    await document.set({
+      ...rawData,
+      ...authorRawDataOfSignedInJournalist(_auth),
+      'publishedAt': FieldValue.serverTimestamp(),
+    });
     return _toModel(await document.get());
   }
 
-  /// The security rules only accept the account's own ID and name as the author.
-  Map<String, dynamic> _authorRawData() {
-    final journalist = _auth.currentUser;
-    if (journalist == null) throw const NoSignedInJournalistException();
-    return {'author': journalist.displayName ?? '', 'authorId': journalist.uid};
+  /// Firestore counts the comments (a count() query) without downloading them.
+  Future<JournalistArticleModel> _toModelWithCommentCount(DocumentSnapshot<Map<String, dynamic>> snapshot) async {
+    final commentCount = await snapshot.reference.collection(_commentsCollectionPath).count().get();
+    return _toModel(snapshot, commentCount: commentCount.count ?? 0);
   }
 
-  JournalistArticleModel _toModel(DocumentSnapshot<Map<String, dynamic>> snapshot) {
+  JournalistArticleModel _toModel(DocumentSnapshot<Map<String, dynamic>> snapshot, {int commentCount = 0}) {
     final data = snapshot.data()!;
     final publishedAt = (data['publishedAt'] as Timestamp).toDate();
-    return JournalistArticleModel.fromRawData(snapshot.id, {...data, 'publishedAt': publishedAt});
+    return JournalistArticleModel.fromRawData(
+      snapshot.id,
+      {...data, 'publishedAt': publishedAt, 'commentCount': commentCount},
+    );
   }
 }

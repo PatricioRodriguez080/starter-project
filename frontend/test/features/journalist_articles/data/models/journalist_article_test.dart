@@ -31,6 +31,14 @@ void main() {
     expect(model.publishedAt, publishedAt);
   });
 
+  test('reads the number of comments counted by the data source', () {
+    expect(JournalistArticleModel.fromRawData('article1', {...rawData, 'commentCount': 3}).commentCount, 3);
+  });
+
+  test('a new article, without a comment count, has no comments', () {
+    expect(JournalistArticleModel.fromRawData('article1', rawData).commentCount, 0);
+  });
+
   test('converts to an entity with the same fields', () {
     final entity = JournalistArticleModel.fromRawData('article1', rawData).toEntity();
 
