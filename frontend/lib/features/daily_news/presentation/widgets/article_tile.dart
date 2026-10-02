@@ -1,8 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../config/theme/app_skeletons.dart';
 import '../../../../config/theme/app_themes.dart';
 import '../../domain/entities/article.dart';
 
@@ -45,19 +45,23 @@ class ArticleWidget extends StatelessWidget {
     );
   }
 
+  /// Without an image URL (e.g. the placeholder articles of the loading skeleton) nothing is downloaded.
   Widget _buildImage(AppPalette palette) {
+    final imageUrl = article!.urlToImage ?? '';
     return ClipRRect(
       borderRadius: BorderRadius.circular(18),
       child: Container(
         width: _thumbnailSize,
         height: _thumbnailSize,
         color: palette.imagePlaceholder,
-        child: CachedNetworkImage(
-          imageUrl: article!.urlToImage!,
-          fit: BoxFit.cover,
-          progressIndicatorBuilder: (_, __, ___) => const Center(child: CupertinoActivityIndicator()),
-          errorWidget: (_, __, ___) => Icon(Icons.image_outlined, color: palette.icon),
-        ),
+        child: imageUrl.isEmpty
+            ? null
+            : CachedNetworkImage(
+                imageUrl: imageUrl,
+                fit: BoxFit.cover,
+                placeholder: (_, __) => const ImageLoadingSkeleton(),
+                errorWidget: (_, __, ___) => Icon(Icons.image_outlined, color: palette.icon),
+              ),
       ),
     );
   }

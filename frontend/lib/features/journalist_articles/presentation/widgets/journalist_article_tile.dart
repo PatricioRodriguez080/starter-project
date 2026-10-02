@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:news_app_clean_architecture/config/theme/app_skeletons.dart';
 import 'package:news_app_clean_architecture/config/theme/app_themes.dart';
 import 'package:news_app_clean_architecture/features/journalist_articles/domain/entities/journalist_article.dart';
 
@@ -39,6 +40,7 @@ class JournalistArticleTile extends StatelessWidget {
     );
   }
 
+  /// Without a thumbnail URL (e.g. the placeholder articles of the loading skeleton) nothing is downloaded.
   Widget _buildThumbnail(AppPalette palette) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(18),
@@ -46,12 +48,14 @@ class JournalistArticleTile extends StatelessWidget {
         width: _thumbnailSize,
         height: _thumbnailSize,
         color: palette.imagePlaceholder,
-        child: CachedNetworkImage(
-          imageUrl: article.thumbnailURL,
-          fit: BoxFit.cover,
-          placeholder: (_, __) => const Center(child: CircularProgressIndicator()),
-          errorWidget: (_, __, ___) => Icon(Icons.broken_image_outlined, color: palette.icon),
-        ),
+        child: article.thumbnailURL.isEmpty
+            ? null
+            : CachedNetworkImage(
+                imageUrl: article.thumbnailURL,
+                fit: BoxFit.cover,
+                placeholder: (_, __) => const ImageLoadingSkeleton(),
+                errorWidget: (_, __, ___) => Icon(Icons.broken_image_outlined, color: palette.icon),
+              ),
       ),
     );
   }

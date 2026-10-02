@@ -20,6 +20,8 @@ class AppPalette extends ThemeExtension<AppPalette> {
     navigationBar: Color(0xD1EBF2FB),
     navigationBorder: Color(0x1A1E6FD9),
     navigationShadow: Color(0x1F15181E),
+    skeletonBase: Color(0xFFE4EAF2),
+    skeletonHighlight: Color(0xFFF5F8FC),
     error: Color(0xFFB3261E),
   );
 
@@ -39,6 +41,8 @@ class AppPalette extends ThemeExtension<AppPalette> {
     navigationBar: Color(0xD11C232E),
     navigationBorder: Color(0x246AA8F7),
     navigationShadow: Color(0x73000000),
+    skeletonBase: Color(0xFF1F2630),
+    skeletonHighlight: Color(0xFF2C3542),
     error: Color(0xFFF2B8B5),
   );
 
@@ -57,6 +61,8 @@ class AppPalette extends ThemeExtension<AppPalette> {
   final Color navigationBar;
   final Color navigationBorder;
   final Color navigationShadow;
+  final Color skeletonBase;
+  final Color skeletonHighlight;
   final Color error;
 
   const AppPalette({
@@ -75,6 +81,8 @@ class AppPalette extends ThemeExtension<AppPalette> {
     required this.navigationBar,
     required this.navigationBorder,
     required this.navigationShadow,
+    required this.skeletonBase,
+    required this.skeletonHighlight,
     required this.error,
   });
 
@@ -102,6 +110,8 @@ class AppPalette extends ThemeExtension<AppPalette> {
       navigationBar: blend(navigationBar, other.navigationBar),
       navigationBorder: blend(navigationBorder, other.navigationBorder),
       navigationShadow: blend(navigationShadow, other.navigationShadow),
+      skeletonBase: blend(skeletonBase, other.skeletonBase),
+      skeletonHighlight: blend(skeletonHighlight, other.skeletonHighlight),
       error: blend(error, other.error),
     );
   }

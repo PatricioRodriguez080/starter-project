@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
+import 'package:news_app_clean_architecture/config/theme/app_skeletons.dart';
 import 'package:news_app_clean_architecture/features/journalist_articles/domain/entities/journalist_article.dart';
 import 'package:news_app_clean_architecture/features/journalist_articles/presentation/widgets/publication_date_text.dart';
 
@@ -55,6 +56,7 @@ class JournalistArticleDetailScreen extends StatelessWidget {
         imageUrl: article.thumbnailURL,
         fit: BoxFit.cover,
         width: double.maxFinite,
+        placeholder: (_, __) => const ImageLoadingSkeleton(),
         errorWidget: (_, __, ___) => const Icon(Icons.broken_image_outlined),
       ),
     );

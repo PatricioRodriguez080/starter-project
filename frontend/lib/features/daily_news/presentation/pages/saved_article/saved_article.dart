@@ -1,7 +1,7 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import '../../../../../config/theme/app_skeletons.dart';
 import '../../../../../config/theme/app_themes.dart';
 import '../../../../../injection_container.dart';
 import '../../../domain/entities/article.dart';
@@ -9,6 +9,17 @@ import '../../bloc/article/local/local_article_bloc.dart';
 import '../../bloc/article/local/local_article_event.dart';
 import '../../bloc/article/local/local_article_state.dart';
 import '../../widgets/article_tile.dart';
+
+/// Placeholder articles drawn as a skeleton while the saved articles are loading.
+final List<ArticleEntity> _loadingArticles = List.filled(
+  3,
+  const ArticleEntity(
+    title: 'A saved headline that takes about two lines',
+    description: 'A short summary of the news that also takes two lines of text.',
+    urlToImage: '',
+    publishedAt: '2026-01-01T00:00:00Z',
+  ),
+);
 
 class SavedArticles extends HookWidget {
   const SavedArticles({super.key});
@@ -37,7 +48,7 @@ class SavedArticles extends HookWidget {
     return BlocBuilder<LocalArticleBloc, LocalArticlesState>(
       builder: (context, state) {
         if (state is LocalArticlesLoading) {
-          return const Center(child: CupertinoActivityIndicator());
+          return AppSkeletonizer(child: _buildArticlesList(context, _loadingArticles));
         } else if (state is LocalArticlesDone) {
           return _buildArticlesList(context, state.articles!);
         }

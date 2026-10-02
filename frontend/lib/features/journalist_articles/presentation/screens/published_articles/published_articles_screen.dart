@@ -1,9 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:news_app_clean_architecture/config/theme/app_skeletons.dart';
 import 'package:news_app_clean_architecture/features/journalist_articles/domain/entities/journalist_article.dart';
 import 'package:news_app_clean_architecture/features/journalist_articles/presentation/bloc/published_articles/published_articles_cubit.dart';
 import 'package:news_app_clean_architecture/features/journalist_articles/presentation/bloc/published_articles/published_articles_state.dart';
 import 'package:news_app_clean_architecture/features/journalist_articles/presentation/widgets/journalist_article_tile.dart';
+
+/// Placeholder articles drawn as a skeleton while the journalists' articles are loading.
+final List<JournalistArticleEntity> _loadingArticles = List.generate(
+  4,
+  (index) => JournalistArticleEntity(
+    id: 'loading$index',
+    title: 'A headline that takes about two lines of the card',
+    description: 'A short summary of the article.',
+    content: '',
+    author: 'Journalist name',
+    thumbnailURL: '',
+    publishedAt: DateTime.utc(2026),
+  ),
+);
 
 /// List of the articles published by journalists, shown inside a tab of the home screen.
 class PublishedArticlesScreen extends StatelessWidget {
@@ -15,7 +30,7 @@ class PublishedArticlesScreen extends StatelessWidget {
       builder: (context, state) {
         if (state is PublishedArticlesSuccess) return _buildArticles(context, state.articles);
         if (state is PublishedArticlesFailure) return _buildFailure(context);
-        return const Center(child: CircularProgressIndicator());
+        return AppSkeletonizer(child: _buildArticles(context, _loadingArticles));
       },
     );
   }

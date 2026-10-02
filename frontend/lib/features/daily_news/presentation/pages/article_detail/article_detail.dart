@@ -1,7 +1,9 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:ionicons/ionicons.dart';
+import '../../../../../config/theme/app_skeletons.dart';
 import '../../../../../injection_container.dart';
 import '../../../domain/entities/article.dart';
 import '../../bloc/article/local/local_article_bloc.dart';
@@ -85,7 +87,12 @@ class ArticleDetailsView extends HookWidget {
       width: double.maxFinite,
       height: 250,
       margin: const EdgeInsets.only(top: 14),
-      child: Image.network(article!.urlToImage!, fit: BoxFit.cover),
+      child: CachedNetworkImage(
+        imageUrl: article!.urlToImage!,
+        fit: BoxFit.cover,
+        placeholder: (_, __) => const ImageLoadingSkeleton(),
+        errorWidget: (_, __, ___) => const Icon(Icons.image_outlined),
+      ),
     );
   }
 
