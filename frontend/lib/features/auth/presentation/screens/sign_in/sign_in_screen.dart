@@ -12,6 +12,8 @@ import 'package:news_app_clean_architecture/features/auth/presentation/widgets/a
 import 'package:news_app_clean_architecture/features/auth/presentation/widgets/auth_switch_prompt.dart';
 import 'package:news_app_clean_architecture/features/auth/presentation/widgets/labeled_text_field.dart';
 import 'package:news_app_clean_architecture/features/auth/presentation/widgets/password_text_field.dart';
+import 'package:news_app_clean_architecture/features/auth/presentation/widgets/daily_news_label.dart';
+import 'package:news_app_clean_architecture/core/constants/route_names.dart';
 
 /// Form where a journalist logs in with their email and password.
 /// Once signed in, it closes and the app shows the news.
@@ -49,7 +51,7 @@ class SignInScreen extends StatelessWidget {
                 AuthSwitchPrompt(
                   question: 'Don’t have an account?',
                   action: 'Sign up',
-                  onPressed: () => Navigator.pushReplacementNamed(context, '/Register'),
+                  onPressed: () => Navigator.pushReplacementNamed(context, RouteNames.register),
                 ),
               ],
             ),
@@ -90,10 +92,7 @@ class _SignInHeader extends StatelessWidget {
           child: Icon(Ionicons.newspaperOutline, size: 32, color: palette.onPrimary),
         ),
         const SizedBox(height: 14),
-        Text(
-          'Daily News',
-          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, letterSpacing: 0.4, color: palette.primary),
-        ),
+        const DailyNewsLabel(),
         const SizedBox(height: 14),
         const Text('Welcome back', style: TextStyle(fontSize: 26, fontWeight: FontWeight.w900)),
         const SizedBox(height: 14),

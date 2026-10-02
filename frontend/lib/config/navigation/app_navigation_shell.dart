@@ -7,6 +7,7 @@ import '../../features/settings/presentation/screens/settings/settings_screen.da
 import 'app_bottom_navigation_bar.dart';
 import 'home_section.dart';
 import 'saved_section.dart';
+import 'package:news_app_clean_architecture/core/constants/route_names.dart';
 
 /// Main screen of the app: shows the section chosen in the bottom navigation bar.
 /// The home tabs ("Daily News" | "Journalists") live here so the + button can open "Journalists".
@@ -60,7 +61,7 @@ class _AppNavigationShellState extends State<AppNavigationShell> {
   /// Opens the form to publish an article and, once it is published,
   /// shows the journalists' articles with the new one.
   Future<void> _onCreatePressed(BuildContext tabContext) async {
-    final publishedArticle = await Navigator.pushNamed(tabContext, '/PublishArticle');
+    final publishedArticle = await Navigator.pushNamed(tabContext, RouteNames.publishArticle);
     if (publishedArticle == null || !tabContext.mounted) return;
     tabContext.read<PublishedArticlesCubit>().loadArticles();
     DefaultTabController.of(tabContext).animateTo(_journalistsTabIndex);

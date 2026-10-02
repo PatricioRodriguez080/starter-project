@@ -1,38 +1,34 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:ionicons/ionicons.dart';
 import '../../../../../config/theme/app_skeletons.dart';
+import '../../../../../config/theme/app_themes.dart';
 import '../../../../../config/theme/app_toasts.dart';
 import '../../../../../config/theme/bookmark_button.dart';
 import '../../../domain/entities/article.dart';
 import '../../bloc/article/bookmark/article_bookmark_cubit.dart';
 import '../../bloc/article/bookmark/article_bookmark_state.dart';
+import '../../widgets/article_tile.dart';
 
-class ArticleDetailsView extends HookWidget {
-  final ArticleEntity? article;
+class ArticleDetailScreen extends StatelessWidget {
+  final ArticleEntity article;
 
-  const ArticleDetailsView({super.key, this.article});
+  const ArticleDetailScreen({super.key, required this.article});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: _buildAppBar(),
-      body: _buildBody(),
-    );
-  }
-
-  PreferredSizeWidget _buildAppBar() {
-    return AppBar(
-      leading: Builder(
-        builder: (context) => GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: () => _onBackButtonTapped(context),
-          child: const Icon(Ionicons.chevronBack),
+      // The app bar adds the platform's back button, with its tooltip and semantics.
+      appBar: AppBar(actions: [_buildBookmark(), const SizedBox(width: 4)]),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            _buildArticleTitleAndDate(),
+            _buildArticleImage(context.palette),
+            _buildArticleDescription(),
+          ],
         ),
       ),
-      actions: [_buildBookmark(), const SizedBox(width: 4)],
     );
   }
 
@@ -54,61 +50,36 @@ class ArticleDetailsView extends HookWidget {
     showAppToast(context, toast);
   }
 
-  Widget _buildBody() {
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          _buildArticleTitleAndDate(),
-          _buildArticleImage(),
-          _buildArticleDescription(),
-        ],
-      ),
-    );
-  }
-
   Widget _buildArticleTitleAndDate() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 22),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Title
-          Text(
-            article!.title!,
-            style: const TextStyle(
-                fontFamily: 'Butler',
-                fontSize: 20,
-                fontWeight: FontWeight.w900),
-          ),
-
+          Text(article.title ?? '', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900)),
           const SizedBox(height: 14),
-          // DateTime
-          Row(
-            children: [
-              const Icon(Ionicons.timeOutline, size: 16),
-              const SizedBox(width: 4),
-              Text(
-                article!.publishedAt!,
-                style: const TextStyle(fontSize: 12),
-              ),
-            ],
-          ),
+          ArticlePublicationDate(publishedAt: article.publishedAt),
         ],
       ),
     );
   }
 
-  Widget _buildArticleImage() {
+  /// Without an image URL nothing is downloaded: the space keeps the color of an image placeholder.
+  Widget _buildArticleImage(AppPalette palette) {
+    final imageUrl = article.urlToImage ?? '';
     return Container(
       width: double.maxFinite,
       height: 250,
       margin: const EdgeInsets.only(top: 14),
-      child: CachedNetworkImage(
-        imageUrl: article!.urlToImage!,
-        fit: BoxFit.cover,
-        placeholder: (_, __) => const ImageLoadingSkeleton(),
-        errorWidget: (_, __, ___) => const Icon(Icons.image_outlined),
-      ),
+      color: palette.imagePlaceholder,
+      child: imageUrl.isEmpty
+          ? null
+          : CachedNetworkImage(
+              imageUrl: imageUrl,
+              fit: BoxFit.cover,
+              placeholder: (_, __) => const ImageLoadingSkeleton(),
+              errorWidget: (_, __, ___) => Icon(Icons.image_outlined, color: palette.icon),
+            ),
     );
   }
 
@@ -116,14 +87,9 @@ class ArticleDetailsView extends HookWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 18),
       child: Text(
-        '${article!.description ?? ''}\n\n${article!.content ?? ''}',
+        '${article.description ?? ''}\n\n${article.content ?? ''}',
         style: const TextStyle(fontSize: 16),
       ),
     );
   }
-
-  void _onBackButtonTapped(BuildContext context) {
-    Navigator.pop(context);
-  }
-
 }

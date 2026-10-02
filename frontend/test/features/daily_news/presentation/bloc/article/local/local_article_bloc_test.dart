@@ -2,23 +2,20 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:news_app_clean_architecture/core/resources/data_state.dart';
 import 'package:news_app_clean_architecture/features/daily_news/domain/entities/article.dart';
-import 'package:news_app_clean_architecture/features/daily_news/domain/use_cases/get_saved_article.dart';
+import 'package:news_app_clean_architecture/features/daily_news/domain/use_cases/get_saved_articles.dart';
 import 'package:news_app_clean_architecture/features/daily_news/domain/use_cases/remove_article.dart';
-import 'package:news_app_clean_architecture/features/daily_news/domain/use_cases/save_article.dart';
 import 'package:news_app_clean_architecture/features/daily_news/presentation/bloc/article/local/local_article_bloc.dart';
 import 'package:news_app_clean_architecture/features/daily_news/presentation/bloc/article/local/local_article_event.dart';
 import 'package:news_app_clean_architecture/features/daily_news/presentation/bloc/article/local/local_article_state.dart';
 
-class MockGetSavedArticleUseCase extends Mock implements GetSavedArticleUseCase {}
-
-class MockSaveArticleUseCase extends Mock implements SaveArticleUseCase {}
+class MockGetSavedArticleUseCase extends Mock implements GetSavedArticlesUseCase {}
 
 class MockRemoveArticleUseCase extends Mock implements RemoveArticleUseCase {}
 
 void main() {
   late MockGetSavedArticleUseCase getSavedArticles;
   late MockRemoveArticleUseCase removeArticle;
-  late LocalArticleBloc bloc;
+  late LocalArticlesBloc bloc;
 
   const article = ArticleEntity(id: 7, url: 'https://example.com/steelers');
   final failure = Exception('Database closed');
@@ -28,7 +25,7 @@ void main() {
   setUp(() {
     getSavedArticles = MockGetSavedArticleUseCase();
     removeArticle = MockRemoveArticleUseCase();
-    bloc = LocalArticleBloc(getSavedArticles, MockSaveArticleUseCase(), removeArticle);
+    bloc = LocalArticlesBloc(getSavedArticles, removeArticle);
   });
 
   tearDown(() => bloc.close());

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../features/daily_news/presentation/screens/home/daily_news.dart';
+import '../../features/daily_news/presentation/screens/daily_news/daily_news_screen.dart';
 import '../../features/journalist_articles/presentation/screens/published_articles/published_articles_screen.dart';
 
 /// Home section: the news from NewsAPI and the journalists' articles, in two tabs.
@@ -26,7 +26,7 @@ class HomeSection extends StatelessWidget {
       ),
       body: const TabBarView(
         children: [
-          DailyNews(),
+          DailyNewsScreen(),
           PublishedArticlesScreen(),
         ],
       ),

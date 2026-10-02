@@ -41,6 +41,6 @@ void main() {
   test('builds the text of a new comment without the spaces around it', () {
     const draft = ArticleCommentDraftEntity(articleId: 'article1', content: '  Great news!\n');
 
-    expect(ArticleCommentModel.rawDataOfNewComment(draft), {'content': 'Great news!'});
+    expect(ArticleCommentModel.buildRawDataOfNewComment(draft), {'content': 'Great news!'});
   });
 }

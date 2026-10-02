@@ -3,7 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:news_app_clean_architecture/features/daily_news/data/data_sources/remote/news_api_service.dart';
 import 'package:news_app_clean_architecture/features/daily_news/data/repository/article_repository_impl.dart';
 import 'package:news_app_clean_architecture/features/daily_news/domain/repository/article_repository.dart';
-import 'package:news_app_clean_architecture/features/daily_news/domain/use_cases/get_article.dart';
+import 'package:news_app_clean_architecture/features/daily_news/domain/use_cases/get_news_articles.dart';
 import 'package:news_app_clean_architecture/features/daily_news/presentation/bloc/article/remote/remote_article_bloc.dart';
 import 'features/auth/data/data_sources/remote/auth_remote_data_source.dart';
 import 'features/auth/data/repository/auth_repository_impl.dart';
@@ -17,7 +17,7 @@ import 'features/auth/presentation/bloc/session/session_cubit.dart';
 import 'features/auth/presentation/bloc/sign_in/sign_in_cubit.dart';
 import 'features/daily_news/data/data_sources/local/app_database.dart';
 import 'features/daily_news/domain/entities/article.dart';
-import 'features/daily_news/domain/use_cases/get_saved_article.dart';
+import 'features/daily_news/domain/use_cases/get_saved_articles.dart';
 import 'features/daily_news/domain/use_cases/is_article_saved.dart';
 import 'features/daily_news/domain/use_cases/remove_article.dart';
 import 'features/daily_news/domain/use_cases/save_article.dart';
@@ -62,61 +62,33 @@ import 'firebase_emulators.dart';
 final sl = GetIt.instance;
 
 Future<void> initializeDependencies() async {
-
-  final database = await $FloorAppDatabase.databaseBuilder('app_database.db').build();
-  sl.registerSingleton<AppDatabase>(database);
-  
-  // Dio
-  sl.registerSingleton<Dio>(Dio());
-
-  // Dependencies
-  sl.registerSingleton<NewsApiService>(NewsApiService(sl()));
-
-  sl.registerSingleton<ArticleRepository>(
-    ArticleRepositoryImpl(sl(),sl())
-  );
-  
-  //UseCases
-  sl.registerSingleton<GetArticleUseCase>(
-    GetArticleUseCase(sl())
-  );
-
-  sl.registerSingleton<GetSavedArticleUseCase>(
-    GetSavedArticleUseCase(sl())
-  );
-
-  sl.registerSingleton<SaveArticleUseCase>(
-    SaveArticleUseCase(sl())
-  );
-  
-  sl.registerSingleton<RemoveArticleUseCase>(
-    RemoveArticleUseCase(sl())
-  );
-
-  sl.registerSingleton<IsArticleSavedUseCase>(
-    IsArticleSavedUseCase(sl())
-  );
-
-
-  //Blocs
-  sl.registerFactory<RemoteArticlesBloc>(
-    ()=> RemoteArticlesBloc(sl())
-  );
-
-  sl.registerFactory<LocalArticleBloc>(
-    ()=> LocalArticleBloc(sl(),sl(),sl())
-  );
-
-  // Created for each news article, which is its parameter.
-  sl.registerFactoryParam<ArticleBookmarkCubit, ArticleEntity, void>(
-    (article, _) => ArticleBookmarkCubit(sl(), sl(), sl(), article),
-  );
-
+  await _initializeDailyNewsDependencies();
   // Before any Firebase request, so every feature talks to the same backend.
   await connectToFirebaseEmulatorsIfEnabled();
   _initializeAuthDependencies();
   _initializeJournalistArticlesDependencies();
   _initializeSettingsDependencies();
+}
+
+Future<void> _initializeDailyNewsDependencies() async {
+  final database = await $FloorAppDatabase.databaseBuilder('app_database.db').build();
+  sl.registerSingleton<AppDatabase>(database);
+  sl.registerSingleton<Dio>(Dio());
+  sl.registerSingleton<NewsApiService>(NewsApiService(sl()));
+  sl.registerSingleton<ArticleRepository>(ArticleRepositoryImpl(sl(), sl()));
+
+  sl.registerSingleton<GetNewsArticlesUseCase>(GetNewsArticlesUseCase(sl()));
+  sl.registerSingleton<GetSavedArticlesUseCase>(GetSavedArticlesUseCase(sl()));
+  sl.registerSingleton<SaveArticleUseCase>(SaveArticleUseCase(sl()));
+  sl.registerSingleton<RemoveArticleUseCase>(RemoveArticleUseCase(sl()));
+  sl.registerSingleton<IsArticleSavedUseCase>(IsArticleSavedUseCase(sl()));
+
+  sl.registerFactory<RemoteArticlesBloc>(() => RemoteArticlesBloc(sl()));
+  sl.registerFactory<LocalArticlesBloc>(() => LocalArticlesBloc(sl(), sl()));
+  // Created for each news article, which is its parameter.
+  sl.registerFactoryParam<ArticleBookmarkCubit, ArticleEntity, void>(
+    (article, _) => ArticleBookmarkCubit(sl(), sl(), sl(), article),
+  );
 }
 
 void _initializeAuthDependencies() {

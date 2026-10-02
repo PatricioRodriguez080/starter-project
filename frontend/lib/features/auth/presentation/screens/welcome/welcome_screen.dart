@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:news_app_clean_architecture/config/theme/app_buttons.dart';
 import 'package:news_app_clean_architecture/config/theme/app_themes.dart';
+import 'package:news_app_clean_architecture/features/auth/presentation/widgets/daily_news_label.dart';
+import 'package:news_app_clean_architecture/core/constants/route_names.dart';
 
 /// First screen when nobody is signed in: invites the journalist to create an account or to log in.
 class WelcomeScreen extends StatelessWidget {
@@ -23,11 +25,11 @@ class WelcomeScreen extends StatelessWidget {
               const Expanded(child: _WelcomeMessage()),
               AppPrimaryButton(
                 label: 'Create account',
-                onPressed: () => Navigator.pushNamed(context, '/Register'),
+                onPressed: () => Navigator.pushNamed(context, RouteNames.register),
               ),
               const SizedBox(height: 12),
               OutlinedButton(
-                onPressed: () => Navigator.pushNamed(context, '/SignIn'),
+                onPressed: () => Navigator.pushNamed(context, RouteNames.signIn),
                 child: const Text('Log in'),
               ),
             ],
@@ -47,10 +49,7 @@ class _WelcomeMessage extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Daily News',
-          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, letterSpacing: 0.4, color: palette.primary),
-        ),
+        const DailyNewsLabel(),
         const SizedBox(height: 12),
         const Text(
           'Read the news.\nPublish your own.',

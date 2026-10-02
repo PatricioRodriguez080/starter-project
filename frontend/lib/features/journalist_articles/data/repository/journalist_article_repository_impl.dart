@@ -30,7 +30,7 @@ class JournalistArticleRepositoryImpl implements JournalistArticleRepository {
       final articleId = _articleDataSource.generateArticleId();
       final thumbnail = ArticleThumbnailModel.fromEntity(draft.thumbnail!);
       final thumbnailURL = await _thumbnailDataSource.uploadThumbnail(articleId, thumbnail);
-      final rawData = JournalistArticleModel.rawDataOfNewArticle(draft, thumbnailURL);
+      final rawData = JournalistArticleModel.buildRawDataOfNewArticle(draft, thumbnailURL);
       final article = await _articleDataSource.createArticle(articleId, rawData);
       return DataSuccess(article.toEntity());
     } on Exception catch (error) {

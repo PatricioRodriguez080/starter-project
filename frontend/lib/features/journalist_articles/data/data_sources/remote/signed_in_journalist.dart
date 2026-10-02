@@ -7,14 +7,14 @@ class NoSignedInJournalistException implements Exception {
 
 /// The author fields of a new article or comment: the ID and the name of the signed-in account,
 /// the only ones the security rules accept.
-Map<String, dynamic> authorRawDataOfSignedInJournalist(FirebaseAuth auth) {
+Map<String, dynamic> readAuthorOfSignedInJournalist(FirebaseAuth auth) {
   final journalist = auth.currentUser;
   if (journalist == null) throw const NoSignedInJournalistException();
   return {'author': journalist.displayName ?? '', 'authorId': journalist.uid};
 }
 
 /// The uid of the signed-in account, which owns the journalist's lists (for example, the saved articles).
-String signedInJournalistId(FirebaseAuth auth) {
+String readSignedInJournalistId(FirebaseAuth auth) {
   final journalist = auth.currentUser;
   if (journalist == null) throw const NoSignedInJournalistException();
   return journalist.uid;

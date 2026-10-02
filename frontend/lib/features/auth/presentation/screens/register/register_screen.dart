@@ -12,6 +12,7 @@ import 'package:news_app_clean_architecture/features/auth/presentation/widgets/a
 import 'package:news_app_clean_architecture/features/auth/presentation/widgets/auth_switch_prompt.dart';
 import 'package:news_app_clean_architecture/features/auth/presentation/widgets/labeled_text_field.dart';
 import 'package:news_app_clean_architecture/features/auth/presentation/widgets/password_text_field.dart';
+import 'package:news_app_clean_architecture/core/constants/route_names.dart';
 
 /// Form where a journalist creates their account. Once it is created, the journalist is signed in,
 /// the form closes and the app shows the news.
@@ -52,7 +53,7 @@ class RegisterScreen extends StatelessWidget {
             AuthSwitchPrompt(
               question: 'Already have an account?',
               action: 'Log in',
-              onPressed: () => Navigator.pushReplacementNamed(context, '/SignIn'),
+              onPressed: () => Navigator.pushReplacementNamed(context, RouteNames.signIn),
             ),
           ],
         ),

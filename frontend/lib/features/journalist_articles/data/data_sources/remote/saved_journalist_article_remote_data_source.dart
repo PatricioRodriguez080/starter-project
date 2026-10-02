@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:news_app_clean_architecture/features/journalist_articles/data/data_sources/remote/signed_in_journalist.dart';
+import 'firestore_paths.dart';
 
 abstract class SavedJournalistArticleRemoteDataSource {
   /// IDs of the articles the signed-in journalist saved, the last saved first.
@@ -25,7 +26,7 @@ class SavedJournalistArticleRemoteDataSourceImpl implements SavedJournalistArtic
         _auth = auth ?? FirebaseAuth.instance;
 
   CollectionReference<Map<String, dynamic>> get _savedArticles {
-    return _firestore.collection('users').doc(signedInJournalistId(_auth)).collection('savedArticles');
+    return _firestore.collection(FirestorePaths.users).doc(readSignedInJournalistId(_auth)).collection(FirestorePaths.savedArticles);
   }
 
   @override

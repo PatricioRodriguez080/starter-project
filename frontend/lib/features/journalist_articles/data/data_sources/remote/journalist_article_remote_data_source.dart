@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:news_app_clean_architecture/features/journalist_articles/data/data_sources/remote/signed_in_journalist.dart';
 import 'package:news_app_clean_architecture/features/journalist_articles/data/models/journalist_article.dart';
+import 'firestore_paths.dart';
 
 abstract class JournalistArticleRemoteDataSource {
   /// Published articles, newest first, each one with the number of comments it has.
@@ -21,9 +22,6 @@ abstract class JournalistArticleRemoteDataSource {
 
 /// Throws a [FirebaseException] when Firestore cannot complete a request.
 class JournalistArticleRemoteDataSourceImpl implements JournalistArticleRemoteDataSource {
-  static const String _collectionPath = 'articles';
-  static const String _commentsCollectionPath = 'comments';
-
   final FirebaseFirestore _firestore;
   final FirebaseAuth _auth;
 
@@ -31,7 +29,7 @@ class JournalistArticleRemoteDataSourceImpl implements JournalistArticleRemoteDa
       : _firestore = firestore ?? FirebaseFirestore.instance,
         _auth = auth ?? FirebaseAuth.instance;
 
-  CollectionReference<Map<String, dynamic>> get _articles => _firestore.collection(_collectionPath);
+  CollectionReference<Map<String, dynamic>> get _articles => _firestore.collection(FirestorePaths.articles);
 
   @override
   Future<List<JournalistArticleModel>> getPublishedArticles() async {
@@ -53,7 +51,7 @@ class JournalistArticleRemoteDataSourceImpl implements JournalistArticleRemoteDa
     final document = _articles.doc(articleId);
     await document.set({
       ...rawData,
-      ...authorRawDataOfSignedInJournalist(_auth),
+      ...readAuthorOfSignedInJournalist(_auth),
       'publishedAt': FieldValue.serverTimestamp(),
     });
     return _toModel(await document.get());
@@ -61,7 +59,7 @@ class JournalistArticleRemoteDataSourceImpl implements JournalistArticleRemoteDa
 
   /// Firestore counts the comments (a count() query) without downloading them.
   Future<JournalistArticleModel> _toModelWithCommentCount(DocumentSnapshot<Map<String, dynamic>> snapshot) async {
-    final commentCount = await snapshot.reference.collection(_commentsCollectionPath).count().get();
+    final commentCount = await snapshot.reference.collection(FirestorePaths.comments).count().get();
     return _toModel(snapshot, commentCount: commentCount.count ?? 0);
   }
 

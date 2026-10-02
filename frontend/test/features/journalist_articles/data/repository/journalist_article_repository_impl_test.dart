@@ -88,7 +88,7 @@ void main() {
       expect(uploadedThumbnail.fileExtension, 'jpg');
       verify(() => articleDataSource.createArticle(
             articleId,
-            JournalistArticleModel.rawDataOfNewArticle(draft, thumbnailURL),
+            JournalistArticleModel.buildRawDataOfNewArticle(draft, thumbnailURL),
           )).called(1);
     });
 

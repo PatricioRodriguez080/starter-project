@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../features/daily_news/presentation/bloc/article/local/local_article_bloc.dart';
 import '../../features/daily_news/presentation/bloc/article/local/local_article_event.dart';
-import '../../features/daily_news/presentation/screens/saved_article/saved_article.dart';
+import '../../features/daily_news/presentation/screens/saved_articles/saved_articles_screen.dart';
 import '../../features/journalist_articles/presentation/bloc/saved_journalist_articles/saved_journalist_articles_cubit.dart';
 import '../../features/journalist_articles/presentation/screens/saved_journalist_articles/saved_journalist_articles_screen.dart';
 import '../../injection_container.dart';
@@ -20,7 +20,7 @@ class SavedSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider<LocalArticleBloc>(create: (_) => sl()..add(const GetSavedArticles())),
+        BlocProvider<LocalArticlesBloc>(create: (_) => sl()..add(const GetSavedArticles())),
         BlocProvider<SavedJournalistArticlesCubit>(create: (_) => sl()..loadSavedArticles()),
       ],
       child: DefaultTabController(
@@ -40,7 +40,7 @@ class SavedSection extends StatelessWidget {
           ),
           body: const TabBarView(
             children: [
-              SavedArticles(),
+              SavedArticlesScreen(),
               SavedJournalistArticlesScreen(),
             ],
           ),

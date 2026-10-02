@@ -7,32 +7,28 @@ PaintingEffect _shimmerOf(AppPalette palette) {
   return ShimmerEffect(baseColor: palette.skeletonBase, highlightColor: palette.skeletonHighlight);
 }
 
-/// Shows [child] as a shimmering skeleton while [enabled]: the real layout is kept and its
-/// texts, icons and images become placeholder "bones" in the colors of the current theme.
+/// Shows [child] as a shimmering skeleton: the real layout is kept and its texts, icons and images become
+/// placeholder "bones" in the colors of the current theme.
 class AppSkeletonizer extends StatelessWidget {
-  final bool enabled;
   final Widget child;
 
-  const AppSkeletonizer({super.key, required this.child, this.enabled = true});
+  const AppSkeletonizer({super.key, required this.child});
 
   @override
   Widget build(BuildContext context) {
-    return Skeletonizer(enabled: enabled, effect: _shimmerOf(context.palette), child: child);
+    return Skeletonizer(effect: _shimmerOf(context.palette), child: child);
   }
 }
 
-/// Shimmering placeholder shown where an image is being downloaded.
+/// Shimmering placeholder that fills the space where an image is being downloaded.
 class ImageLoadingSkeleton extends StatelessWidget {
-  final double? width;
-  final double? height;
-
-  const ImageLoadingSkeleton({super.key, this.width, this.height});
+  const ImageLoadingSkeleton({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Skeletonizer.zone(
       effect: _shimmerOf(context.palette),
-      child: Bone(width: width ?? double.infinity, height: height ?? double.infinity),
+      child: const Bone(width: double.infinity, height: double.infinity),
     );
   }
 }

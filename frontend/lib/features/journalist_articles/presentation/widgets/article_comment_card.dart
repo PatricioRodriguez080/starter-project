@@ -3,7 +3,7 @@ import 'package:news_app_clean_architecture/config/theme/app_themes.dart';
 import 'package:news_app_clean_architecture/config/theme/user_avatar.dart';
 import 'package:news_app_clean_architecture/features/journalist_articles/domain/entities/article_comment.dart';
 
-import 'publication_date_text.dart';
+import 'package:news_app_clean_architecture/config/theme/publication_date_text.dart';
 
 /// A comment with the avatar, name and date of its author.
 class ArticleCommentCard extends StatelessWidget {
@@ -46,7 +46,7 @@ class ArticleCommentCard extends StatelessWidget {
           children: [
             Text(comment.author, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800)),
             Text(
-              formatPublicationDate(comment.createdAt),
+              formatDateTime(comment.createdAt),
               style: TextStyle(fontSize: 12, color: palette.textSecondary),
             ),
           ],

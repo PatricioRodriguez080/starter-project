@@ -1,5 +1,5 @@
 name: news_app_clean_architecture
-description: A new Flutter project.
+description: Daily News, where journalists read the news and publish their own articles.
 
 publish_to: 'none'
 
@@ -11,8 +11,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
-  cupertino_icons: ^2.0.0
 
   #icon
   ionicons: ^0.2.3
@@ -41,9 +39,6 @@ dependencies:
   cloud_firestore: ^6.10.0
   firebase_storage: ^13.6.0
 
-
-  #Hooks
-  flutter_hooks: ^0.21.3+1
 
   #chached image 
   cached_network_image: ^4.0.4

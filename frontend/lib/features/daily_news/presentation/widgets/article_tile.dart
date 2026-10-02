@@ -1,25 +1,24 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 import '../../../../config/theme/app_skeletons.dart';
 import '../../../../config/theme/app_themes.dart';
 import '../../../../config/theme/bookmark_button.dart';
+import '../../../../config/theme/publication_date_text.dart';
 import '../../domain/entities/article.dart';
 
-class ArticleWidget extends StatelessWidget {
+/// A news article in a list. With [onRemove], it shows a filled bookmark to take it out of the saved news.
+class ArticleTile extends StatelessWidget {
   static const double _thumbnailSize = 116;
 
-  final ArticleEntity? article;
-  final bool? isRemovable;
+  final ArticleEntity article;
   final void Function(ArticleEntity article)? onRemove;
   final void Function(ArticleEntity article)? onArticlePressed;
 
-  const ArticleWidget({
+  const ArticleTile({
     super.key,
-    this.article,
+    required this.article,
     this.onArticlePressed,
-    this.isRemovable = false,
     this.onRemove,
   });
 
@@ -27,7 +26,7 @@ class ArticleWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final palette = context.palette;
     return InkWell(
-      onTap: _onTap,
+      onTap: () => onArticlePressed?.call(article),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         child: SizedBox(
@@ -38,7 +37,7 @@ class ArticleWidget extends StatelessWidget {
               _buildImage(palette),
               const SizedBox(width: 14),
               Expanded(child: _buildTitleAndDescription(palette)),
-              _buildRemovableArea(),
+              _buildRemoveButton(),
             ],
           ),
         ),
@@ -48,7 +47,7 @@ class ArticleWidget extends StatelessWidget {
 
   /// Without an image URL (e.g. the placeholder articles of the loading skeleton) nothing is downloaded.
   Widget _buildImage(AppPalette palette) {
-    final imageUrl = article!.urlToImage ?? '';
+    final imageUrl = article.urlToImage ?? '';
     return ClipRRect(
       borderRadius: BorderRadius.circular(18),
       child: Container(
@@ -73,54 +72,41 @@ class ArticleWidget extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          article!.title ?? '',
+          article.title ?? '',
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
           style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16, height: 1.25),
         ),
         const SizedBox(height: 6),
         Text(
-          article!.description ?? '',
+          article.description ?? '',
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
           style: TextStyle(fontSize: 13, height: 1.4, color: palette.textSecondary),
         ),
         const Spacer(),
-        Row(
-          children: [
-            Icon(Icons.schedule, size: 14, color: palette.textSecondary),
-            const SizedBox(width: 4),
-            Text(
-              _formatPublicationDate(article!.publishedAt ?? ''),
-              style: TextStyle(fontSize: 12, color: palette.textSecondary),
-            ),
-          ],
-        ),
+        ArticlePublicationDate(publishedAt: article.publishedAt),
       ],
     );
   }
 
-  Widget _buildRemovableArea() {
-    if (!isRemovable!) return const SizedBox.shrink();
-    return BookmarkButton(isSaved: true, onPressed: _onRemove, size: 22);
+  Widget _buildRemoveButton() {
+    final onRemove = this.onRemove;
+    if (onRemove == null) return const SizedBox.shrink();
+    return BookmarkButton(isSaved: true, onPressed: () => onRemove(article), size: 22);
   }
+}
 
-  /// NewsAPI dates are ISO strings ("2026-09-29T18:00:00Z"); anything else is shown as it comes.
-  static String _formatPublicationDate(String publishedAt) {
-    final date = DateTime.tryParse(publishedAt);
-    if (date == null) return publishedAt;
-    return DateFormat('MMM d, y · HH:mm').format(date.toLocal());
-  }
+/// The date of a news article. NewsAPI sends ISO dates ("2026-09-29T18:00:00Z"); anything else is shown as it comes.
+class ArticlePublicationDate extends StatelessWidget {
+  final String? publishedAt;
 
-  void _onTap() {
-    if (onArticlePressed != null) {
-      onArticlePressed!(article!);
-    }
-  }
+  const ArticlePublicationDate({super.key, required this.publishedAt});
 
-  void _onRemove() {
-    if (onRemove != null) {
-      onRemove!(article!);
-    }
+  @override
+  Widget build(BuildContext context) {
+    final date = DateTime.tryParse(publishedAt ?? '');
+    if (date != null) return PublicationDateText(publishedAt: date);
+    return Text(publishedAt ?? '', style: TextStyle(fontSize: 12, color: context.palette.textSecondary));
   }
 }

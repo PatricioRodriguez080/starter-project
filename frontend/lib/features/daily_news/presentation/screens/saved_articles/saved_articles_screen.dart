@@ -8,28 +8,22 @@ import '../../bloc/article/local/local_article_bloc.dart';
 import '../../bloc/article/local/local_article_event.dart';
 import '../../bloc/article/local/local_article_state.dart';
 import '../../widgets/article_tile.dart';
+import '../../widgets/article_placeholders.dart';
+import 'package:news_app_clean_architecture/core/constants/route_names.dart';
 
-/// Placeholder articles drawn as a skeleton while the saved articles are loading.
-final List<ArticleEntity> _loadingArticles = List.filled(
-  3,
-  const ArticleEntity(
-    title: 'A saved headline that takes about two lines',
-    description: 'A short summary of the news that also takes two lines of text.',
-    urlToImage: '',
-    publishedAt: '2026-01-01T00:00:00Z',
-  ),
-);
+/// Placeholder articles drawn as a skeleton while the real ones are loading.
+final List<ArticleEntity> _loadingArticles = buildPlaceholderArticles(3);
 
 /// The news saved on the phone: the "Daily News" tab of the Saved section, which the app navigation builds
-/// with the [LocalArticleBloc].
-class SavedArticles extends StatelessWidget {
-  const SavedArticles({super.key});
+/// with the [LocalArticlesBloc].
+class SavedArticlesScreen extends StatelessWidget {
+  const SavedArticlesScreen({super.key});
 
   @override
   Widget build(BuildContext context) => _buildSavedNews();
 
   Widget _buildSavedNews() {
-    return BlocBuilder<LocalArticleBloc, LocalArticlesState>(
+    return BlocBuilder<LocalArticlesBloc, LocalArticlesState>(
       builder: (context, state) {
         if (state is LocalArticlesLoading) {
           return AppSkeletonizer(child: _buildArticlesList(context, _loadingArticles));
@@ -60,9 +54,8 @@ class SavedArticles extends StatelessWidget {
       padding: EdgeInsets.only(top: 8, bottom: MediaQuery.paddingOf(context).bottom + 8),
       itemCount: articles.length,
       itemBuilder: (context, index) {
-        return ArticleWidget(
+        return ArticleTile(
           article: articles[index],
-          isRemovable: true,
           onRemove: (article) => _onRemoveArticle(context, article),
           onArticlePressed: (article) => _onArticlePressed(context, article),
         );
@@ -71,14 +64,14 @@ class SavedArticles extends StatelessWidget {
   }
 
   void _onRemoveArticle(BuildContext context, ArticleEntity article) {
-    BlocProvider.of<LocalArticleBloc>(context).add(RemoveArticle(article));
+    BlocProvider.of<LocalArticlesBloc>(context).add(RemoveArticle(article));
     showAppToast(context, const AppToast.info('Removed from saved'));
   }
 
   /// When the journalist comes back, the list is read again, in case they removed the article there.
   Future<void> _onArticlePressed(BuildContext context, ArticleEntity article) async {
-    final localArticleBloc = BlocProvider.of<LocalArticleBloc>(context);
-    await Navigator.pushNamed(context, '/ArticleDetails', arguments: article);
+    final localArticleBloc = BlocProvider.of<LocalArticlesBloc>(context);
+    await Navigator.pushNamed(context, RouteNames.articleDetails, arguments: article);
     localArticleBloc.add(const GetSavedArticles());
   }
 }

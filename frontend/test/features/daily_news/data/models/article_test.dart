@@ -1,5 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:news_app_clean_architecture/core/constants/constants.dart';
 import 'package:news_app_clean_architecture/features/daily_news/data/models/article.dart';
 import 'package:news_app_clean_architecture/features/daily_news/domain/entities/article.dart';
 
@@ -22,9 +21,9 @@ void main() {
     expect(model.urlToImage, 'https://example.com/steelers.jpg');
   });
 
-  test('uses the default image when NewsAPI sends none', () {
-    expect(ArticleModel.fromRawData({...rawData, 'urlToImage': null}).urlToImage, kDefaultImage);
-    expect(ArticleModel.fromRawData({...rawData, 'urlToImage': ''}).urlToImage, kDefaultImage);
+  test('leaves the image empty when NewsAPI sends none, so the app shows a placeholder', () {
+    expect(ArticleModel.fromRawData({...rawData, 'urlToImage': null}).urlToImage, '');
+    expect(ArticleModel.fromRawData({...rawData, 'urlToImage': ''}).urlToImage, '');
   });
 
   test('uses empty texts for the fields NewsAPI leaves out', () {

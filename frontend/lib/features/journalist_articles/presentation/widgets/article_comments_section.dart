@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ionicons/ionicons.dart';
+import 'package:news_app_clean_architecture/config/theme/load_failure_message.dart';
 import 'package:news_app_clean_architecture/config/theme/app_skeletons.dart';
 import 'package:news_app_clean_architecture/config/theme/app_themes.dart';
 import 'package:news_app_clean_architecture/features/journalist_articles/domain/entities/article_comment.dart';
@@ -50,7 +51,10 @@ class ArticleCommentsSection extends StatelessWidget {
       return state.comments.isEmpty ? const _NoCommentsMessage() : _CommentList(comments: state.comments);
     }
     if (state is ArticleCommentsFailure) {
-      return _LoadFailureMessage(onRetry: context.read<ArticleCommentsCubit>().loadComments);
+      return LoadFailureMessage(
+        message: 'The comments could not be loaded.',
+        onRetry: context.read<ArticleCommentsCubit>().loadComments,
+      );
     }
     return AppSkeletonizer(child: _CommentList(comments: _loadingComments));
   }
@@ -134,22 +138,6 @@ class _NoCommentsMessage extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-class _LoadFailureMessage extends StatelessWidget {
-  final VoidCallback onRetry;
-
-  const _LoadFailureMessage({required this.onRetry});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        const Text('The comments could not be loaded.'),
-        TextButton.icon(onPressed: onRetry, icon: const Icon(Icons.refresh), label: const Text('Try again')),
-      ],
     );
   }
 }

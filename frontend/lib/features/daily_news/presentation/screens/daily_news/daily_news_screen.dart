@@ -6,21 +6,15 @@ import 'package:news_app_clean_architecture/features/daily_news/presentation/blo
 import '../../../../../config/theme/app_skeletons.dart';
 import '../../../domain/entities/article.dart';
 import '../../widgets/article_tile.dart';
+import '../../widgets/article_placeholders.dart';
+import 'package:news_app_clean_architecture/core/constants/route_names.dart';
 
-/// Placeholder articles drawn as a skeleton while the news are loading.
-final List<ArticleEntity> _loadingArticles = List.filled(
-  5,
-  const ArticleEntity(
-    title: 'A headline that takes about two lines of the card',
-    description: 'A short summary of the news that also takes two lines of text.',
-    urlToImage: '',
-    publishedAt: '2026-01-01T00:00:00Z',
-  ),
-);
+/// Placeholder articles drawn as a skeleton while the real ones are loading.
+final List<ArticleEntity> _loadingArticles = buildPlaceholderArticles(5);
 
 /// The news from NewsAPI: the "Daily News" tab of the Home section, which the app navigation builds.
-class DailyNews extends StatelessWidget {
-  const DailyNews({super.key});
+class DailyNewsScreen extends StatelessWidget {
+  const DailyNewsScreen({super.key});
 
   @override
   Widget build(BuildContext context) => _buildDailyNewsTab();
@@ -47,7 +41,7 @@ class DailyNews extends StatelessWidget {
     return ListView.builder(
       padding: EdgeInsets.only(top: 8, bottom: MediaQuery.paddingOf(context).bottom + 8),
       itemCount: articles.length,
-      itemBuilder: (context, index) => ArticleWidget(
+      itemBuilder: (context, index) => ArticleTile(
         article: articles[index],
         onArticlePressed: (article) => _onArticlePressed(context, article),
       ),
@@ -55,6 +49,6 @@ class DailyNews extends StatelessWidget {
   }
 
   void _onArticlePressed(BuildContext context, ArticleEntity article) {
-    Navigator.pushNamed(context, '/ArticleDetails', arguments: article);
+    Navigator.pushNamed(context, RouteNames.articleDetails, arguments: article);
   }
 }

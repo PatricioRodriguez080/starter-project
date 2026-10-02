@@ -1,27 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:news_app_clean_architecture/config/theme/app_skeletons.dart';
+import 'package:news_app_clean_architecture/config/theme/load_failure_message.dart';
 import 'package:news_app_clean_architecture/config/theme/app_themes.dart';
 import 'package:news_app_clean_architecture/config/theme/app_toasts.dart';
 import 'package:news_app_clean_architecture/features/journalist_articles/domain/entities/journalist_article.dart';
 import 'package:news_app_clean_architecture/features/journalist_articles/presentation/bloc/saved_journalist_articles/saved_journalist_articles_cubit.dart';
 import 'package:news_app_clean_architecture/features/journalist_articles/presentation/bloc/saved_journalist_articles/saved_journalist_articles_state.dart';
 import 'package:news_app_clean_architecture/features/journalist_articles/presentation/widgets/journalist_article_tile.dart';
+import 'package:news_app_clean_architecture/features/journalist_articles/presentation/widgets/journalist_article_placeholders.dart';
+import 'package:news_app_clean_architecture/core/constants/route_names.dart';
 
-/// Placeholder articles drawn as a skeleton while the saved articles are loading.
-final List<JournalistArticleEntity> _loadingArticles = List.generate(
-  3,
-  (index) => JournalistArticleEntity(
-    id: 'loading$index',
-    title: 'A saved headline that takes about two lines',
-    description: 'A short summary of the article.',
-    content: '',
-    author: 'Journalist name',
-    authorId: '',
-    thumbnailURL: '',
-    publishedAt: DateTime.utc(2026),
-  ),
-);
+/// Placeholder articles drawn as a skeleton while the real ones are loading.
+final List<JournalistArticleEntity> _loadingArticles = buildPlaceholderJournalistArticles(3);
 
 /// The journalists' articles that the signed-in journalist saved, shown inside a tab of the Saved section.
 class SavedJournalistArticlesScreen extends StatelessWidget {
@@ -70,23 +61,16 @@ class SavedJournalistArticlesScreen extends StatelessWidget {
 
   Widget _buildFailure(BuildContext context) {
     return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Text('Your saved articles could not be loaded.'),
-          TextButton.icon(
-            onPressed: context.read<SavedJournalistArticlesCubit>().loadSavedArticles,
-            icon: const Icon(Icons.refresh),
-            label: const Text('Try again'),
-          ),
-        ],
+      child: LoadFailureMessage(
+        message: 'Your saved articles could not be loaded.',
+        onRetry: context.read<SavedJournalistArticlesCubit>().loadSavedArticles,
       ),
     );
   }
 
   /// When the journalist comes back, the list is read again, in case they removed the article there.
   Future<void> _onArticlePressed(BuildContext context, JournalistArticleEntity article) async {
-    await Navigator.pushNamed(context, '/JournalistArticleDetails', arguments: article);
+    await Navigator.pushNamed(context, RouteNames.journalistArticleDetails, arguments: article);
     if (context.mounted) context.read<SavedJournalistArticlesCubit>().loadSavedArticles();
   }
 }

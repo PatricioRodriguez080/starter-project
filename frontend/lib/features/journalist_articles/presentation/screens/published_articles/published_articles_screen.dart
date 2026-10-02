@@ -1,25 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:news_app_clean_architecture/config/theme/app_skeletons.dart';
+import 'package:news_app_clean_architecture/config/theme/load_failure_message.dart';
 import 'package:news_app_clean_architecture/features/journalist_articles/domain/entities/journalist_article.dart';
 import 'package:news_app_clean_architecture/features/journalist_articles/presentation/bloc/published_articles/published_articles_cubit.dart';
 import 'package:news_app_clean_architecture/features/journalist_articles/presentation/bloc/published_articles/published_articles_state.dart';
 import 'package:news_app_clean_architecture/features/journalist_articles/presentation/widgets/journalist_article_tile.dart';
+import 'package:news_app_clean_architecture/features/journalist_articles/presentation/widgets/journalist_article_placeholders.dart';
+import 'package:news_app_clean_architecture/core/constants/route_names.dart';
 
-/// Placeholder articles drawn as a skeleton while the journalists' articles are loading.
-final List<JournalistArticleEntity> _loadingArticles = List.generate(
-  4,
-  (index) => JournalistArticleEntity(
-    id: 'loading$index',
-    title: 'A headline that takes about two lines of the card',
-    description: 'A short summary of the article.',
-    content: '',
-    author: 'Journalist name',
-    authorId: '',
-    thumbnailURL: '',
-    publishedAt: DateTime.utc(2026),
-  ),
-);
+/// Placeholder articles drawn as a skeleton while the real ones are loading.
+final List<JournalistArticleEntity> _loadingArticles = buildPlaceholderJournalistArticles(4);
 
 /// List of the articles published by journalists, shown inside a tab of the home screen.
 class PublishedArticlesScreen extends StatelessWidget {
@@ -53,23 +44,16 @@ class PublishedArticlesScreen extends StatelessWidget {
 
   Widget _buildFailure(BuildContext context) {
     return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Text('The articles could not be loaded.'),
-          TextButton.icon(
-            onPressed: () => context.read<PublishedArticlesCubit>().loadArticles(),
-            icon: const Icon(Icons.refresh),
-            label: const Text('Try again'),
-          ),
-        ],
+      child: LoadFailureMessage(
+        message: 'The articles could not be loaded.',
+        onRetry: () => context.read<PublishedArticlesCubit>().loadArticles(),
       ),
     );
   }
 
   /// When the journalist comes back, the articles are read again, so their comment counts are up to date.
   Future<void> _onArticlePressed(BuildContext context, JournalistArticleEntity article) async {
-    await Navigator.pushNamed(context, '/JournalistArticleDetails', arguments: article);
+    await Navigator.pushNamed(context, RouteNames.journalistArticleDetails, arguments: article);
     if (context.mounted) context.read<PublishedArticlesCubit>().loadArticles();
   }
 }

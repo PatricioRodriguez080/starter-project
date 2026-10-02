@@ -25,7 +25,7 @@ class ArticleCommentModel extends ArticleCommentEntity {
 
   /// Fields that the journalist wrote in a new comment, without the spaces around it. The data source adds
   /// the author, taken from the signed-in account, and `createdAt`, set by the server.
-  static Map<String, dynamic> rawDataOfNewComment(ArticleCommentDraftEntity draft) {
+  static Map<String, dynamic> buildRawDataOfNewComment(ArticleCommentDraftEntity draft) {
     return {'content': draft.content.trim()};
   }
 

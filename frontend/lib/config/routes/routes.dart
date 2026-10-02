@@ -7,7 +7,7 @@ import '../../features/auth/presentation/screens/register/register_screen.dart';
 import '../../features/auth/presentation/screens/sign_in/sign_in_screen.dart';
 import '../../features/daily_news/domain/entities/article.dart';
 import '../../features/daily_news/presentation/bloc/article/bookmark/article_bookmark_cubit.dart';
-import '../../features/daily_news/presentation/screens/article_detail/article_detail.dart';
+import '../../features/daily_news/presentation/screens/article_detail/article_detail_screen.dart';
 import '../../features/journalist_articles/domain/entities/journalist_article.dart';
 import '../../features/journalist_articles/presentation/bloc/add_article_comment/add_article_comment_cubit.dart';
 import '../../features/journalist_articles/presentation/bloc/article_comments/article_comments_cubit.dart';
@@ -16,47 +16,45 @@ import '../../features/journalist_articles/presentation/bloc/publish_article/pub
 import '../../features/journalist_articles/presentation/screens/journalist_article_detail/journalist_article_detail_screen.dart';
 import '../../features/journalist_articles/presentation/screens/publish_article/publish_article_screen.dart';
 import '../../injection_container.dart';
-import '../navigation/auth_gate.dart';
+import 'package:news_app_clean_architecture/core/constants/route_names.dart';
 
 class AppRoutes {
   static Route onGenerateRoutes(RouteSettings settings) {
     switch (settings.name) {
-      case '/':
-        return _materialRoute(const AuthGate());
-
-      case '/SignIn':
+      case RouteNames.signIn:
         return _materialRoute(BlocProvider(
           create: (_) => sl<SignInCubit>(),
           child: const SignInScreen(),
         ));
 
-      case '/Register':
+      case RouteNames.register:
         return _materialRoute(BlocProvider(
           create: (_) => sl<RegisterCubit>(),
           child: const RegisterScreen(),
         ));
 
-      case '/ArticleDetails':
+      case RouteNames.articleDetails:
         return _materialRoute(_buildArticleDetails(settings.arguments as ArticleEntity));
 
-      case '/PublishArticle':
+      case RouteNames.publishArticle:
         return _materialRoute(BlocProvider(
           create: (_) => sl<PublishArticleCubit>(),
           child: const PublishArticleScreen(),
         ));
 
-      case '/JournalistArticleDetails':
+      case RouteNames.journalistArticleDetails:
         return _materialRoute(_buildJournalistArticleDetails(settings.arguments as JournalistArticleEntity));
 
+      // Every screen is opened by one of the names above; any other name is a programming error.
       default:
-        return _materialRoute(const AuthGate());
+        throw ArgumentError.value(settings.name, 'settings.name', 'There is no route with this name');
     }
   }
 
   static Widget _buildArticleDetails(ArticleEntity article) {
     return BlocProvider(
       create: (_) => sl<ArticleBookmarkCubit>(param1: article)..loadBookmark(),
-      child: ArticleDetailsView(article: article),
+      child: ArticleDetailScreen(article: article),
     );
   }
 

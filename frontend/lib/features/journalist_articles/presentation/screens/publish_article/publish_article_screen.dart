@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ionicons/ionicons.dart';
+import 'package:news_app_clean_architecture/config/theme/hidden_character_counter.dart';
 import 'package:news_app_clean_architecture/config/theme/app_buttons.dart';
 import 'package:news_app_clean_architecture/config/theme/app_themes.dart';
 import 'package:news_app_clean_architecture/config/theme/app_toasts.dart';
@@ -146,7 +147,7 @@ class _DraftTextField extends StatelessWidget {
           const SizedBox(height: 6),
           TextField(
             maxLength: maxLength,
-            buildCounter: showsCounter ? null : _hideCounter,
+            buildCounter: showsCounter ? null : hideCharacterCounter,
             minLines: minLines,
             maxLines: maxLines,
             enabled: enabled,
@@ -158,14 +159,6 @@ class _DraftTextField extends StatelessWidget {
     );
   }
 
-  static Widget? _hideCounter(
-    BuildContext context, {
-    required int currentLength,
-    required bool isFocused,
-    required int? maxLength,
-  }) {
-    return null;
-  }
 }
 
 class _PublishButton extends StatelessWidget {

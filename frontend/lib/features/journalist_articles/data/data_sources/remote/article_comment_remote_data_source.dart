@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:news_app_clean_architecture/features/journalist_articles/data/data_sources/remote/signed_in_journalist.dart';
 import 'package:news_app_clean_architecture/features/journalist_articles/data/models/article_comment.dart';
+import 'firestore_paths.dart';
 
 abstract class ArticleCommentRemoteDataSource {
   /// Comments of the article [articleId], oldest first.
@@ -23,7 +24,7 @@ class ArticleCommentRemoteDataSourceImpl implements ArticleCommentRemoteDataSour
         _auth = auth ?? FirebaseAuth.instance;
 
   CollectionReference<Map<String, dynamic>> _commentsOf(String articleId) {
-    return _firestore.collection('articles').doc(articleId).collection('comments');
+    return _firestore.collection(FirestorePaths.articles).doc(articleId).collection(FirestorePaths.comments);
   }
 
   @override
@@ -37,7 +38,7 @@ class ArticleCommentRemoteDataSourceImpl implements ArticleCommentRemoteDataSour
     final document = _commentsOf(articleId).doc();
     await document.set({
       ...rawData,
-      ...authorRawDataOfSignedInJournalist(_auth),
+      ...readAuthorOfSignedInJournalist(_auth),
       'createdAt': FieldValue.serverTimestamp(),
     });
     return _toModel(await document.get());

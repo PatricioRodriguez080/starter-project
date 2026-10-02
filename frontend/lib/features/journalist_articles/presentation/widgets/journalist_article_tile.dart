@@ -6,7 +6,7 @@ import 'package:news_app_clean_architecture/config/theme/bookmark_button.dart';
 import 'package:news_app_clean_architecture/features/journalist_articles/domain/entities/journalist_article.dart';
 
 import 'comment_count.dart';
-import 'publication_date_text.dart';
+import 'package:news_app_clean_architecture/config/theme/publication_date_text.dart';
 
 class JournalistArticleTile extends StatelessWidget {
   static const double _thumbnailSize = 116;

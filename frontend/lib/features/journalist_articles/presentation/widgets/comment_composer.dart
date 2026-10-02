@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ionicons/ionicons.dart';
+import 'package:news_app_clean_architecture/config/theme/hidden_character_counter.dart';
 import 'package:news_app_clean_architecture/config/theme/app_glass_pill.dart';
 import 'package:news_app_clean_architecture/config/theme/app_themes.dart';
 import 'package:news_app_clean_architecture/features/journalist_articles/domain/entities/article_comment_draft.dart';
@@ -57,7 +58,7 @@ class _CommentComposerState extends State<CommentComposer> {
     return TextField(
       controller: _controller,
       maxLength: ArticleCommentDraftEntity.maxContentLength,
-      buildCounter: _hideCounter,
+      buildCounter: hideCharacterCounter,
       textInputAction: TextInputAction.send,
       textCapitalization: TextCapitalization.sentences,
       onChanged: cubit.updateContent,
@@ -75,14 +76,6 @@ class _CommentComposerState extends State<CommentComposer> {
     );
   }
 
-  static Widget? _hideCounter(
-    BuildContext context, {
-    required int currentLength,
-    required bool isFocused,
-    required int? maxLength,
-  }) {
-    return null;
-  }
 }
 
 class _SendButton extends StatelessWidget {

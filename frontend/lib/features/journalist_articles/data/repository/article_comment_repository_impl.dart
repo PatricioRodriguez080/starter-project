@@ -23,7 +23,7 @@ class ArticleCommentRepositoryImpl implements ArticleCommentRepository {
   @override
   Future<DataState<ArticleCommentEntity>> addComment(ArticleCommentDraftEntity draft) async {
     try {
-      final rawData = ArticleCommentModel.rawDataOfNewComment(draft);
+      final rawData = ArticleCommentModel.buildRawDataOfNewComment(draft);
       final comment = await _commentDataSource.addComment(draft.articleId, rawData);
       return DataSuccess(comment.toEntity());
     } on Exception catch (error) {

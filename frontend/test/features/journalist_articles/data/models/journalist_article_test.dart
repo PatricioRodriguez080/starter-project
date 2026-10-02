@@ -66,7 +66,7 @@ void main() {
       thumbnail: ArticleThumbnailEntity(bytes: Uint8List(8), fileExtension: 'jpg'),
     );
 
-    final newArticle = JournalistArticleModel.rawDataOfNewArticle(draft, 'https://example.com/thumb.jpg');
+    final newArticle = JournalistArticleModel.buildRawDataOfNewArticle(draft, 'https://example.com/thumb.jpg');
 
     expect(newArticle, {
       'title': 'A title',

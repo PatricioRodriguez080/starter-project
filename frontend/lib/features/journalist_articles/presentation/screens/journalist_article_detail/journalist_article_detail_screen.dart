@@ -16,7 +16,7 @@ import 'package:news_app_clean_architecture/features/journalist_articles/present
 import 'package:news_app_clean_architecture/features/journalist_articles/presentation/bloc/journalist_article_bookmark/journalist_article_bookmark_state.dart';
 import 'package:news_app_clean_architecture/features/journalist_articles/presentation/widgets/article_comments_section.dart';
 import 'package:news_app_clean_architecture/features/journalist_articles/presentation/widgets/comment_composer.dart';
-import 'package:news_app_clean_architecture/features/journalist_articles/presentation/widgets/publication_date_text.dart';
+import 'package:news_app_clean_architecture/config/theme/publication_date_text.dart';
 
 /// An article with its comments, and the pill to write a new one floating above them.
 class JournalistArticleDetailScreen extends StatefulWidget {

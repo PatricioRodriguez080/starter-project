@@ -317,4 +317,4 @@ One commit per step of the README, then one per feature:
 `(1.1)` schema · `(1.3)` rules · `(1.2)` seed of the collection · `(2.0)` toolchain and Firebase · `(2.1)` domain with
 mock data · `(2.2)` presentation · `(2.3)` data layer · design · themes and pill · skeletons · accounts (backend,
 frontend) · comments (backend, frontend) · saved articles (backend, toasts, frontend) · icon and splash · pure-Dart
-domain · Daily News aligned with the docs · architecture tests · schema test · iOS · this report.
+domain · Daily News aligned with the docs · architecture tests · schema test · iOS · this report · code quality cleanup.

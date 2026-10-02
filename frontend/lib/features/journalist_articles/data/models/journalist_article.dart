@@ -33,7 +33,7 @@ class JournalistArticleModel extends JournalistArticleEntity {
 
   /// Fields that the journalist wrote in a new article. The data source adds the author, taken from the
   /// signed-in account, and `publishedAt`, set by the server.
-  static Map<String, dynamic> rawDataOfNewArticle(ArticleDraftEntity draft, String thumbnailURL) {
+  static Map<String, dynamic> buildRawDataOfNewArticle(ArticleDraftEntity draft, String thumbnailURL) {
     return {
       'title': draft.title,
       'description': draft.description,
