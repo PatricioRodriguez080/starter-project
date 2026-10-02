@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:news_app_clean_architecture/config/theme/app_skeletons.dart';
 import 'package:news_app_clean_architecture/config/theme/app_themes.dart';
+import 'package:news_app_clean_architecture/config/theme/app_toasts.dart';
 import 'package:news_app_clean_architecture/features/journalist_articles/domain/entities/journalist_article.dart';
 import 'package:news_app_clean_architecture/features/journalist_articles/presentation/bloc/add_article_comment/add_article_comment_cubit.dart';
 import 'package:news_app_clean_architecture/features/journalist_articles/presentation/bloc/add_article_comment/add_article_comment_state.dart';
@@ -86,8 +87,9 @@ class _JournalistArticleDetailScreenState extends State<JournalistArticleDetailS
       WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToLastComment());
     }
     if (state is AddArticleCommentFailure) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Your comment could not be sent. Please try again.')),
+      showAppToast(
+        context,
+        const AppToast.error('Your comment could not be sent', description: 'Check your connection and try again.'),
       );
     }
   }

@@ -55,7 +55,7 @@ void main() {
     tester.view.physicalSize = const Size(1080, 2400);
     tester.view.devicePixelRatio = 2.625;
     addTearDown(tester.view.reset);
-    // Like the home screen, the screen that opens the form has a Scaffold where the SnackBar is shown.
+    // Like the home screen, the screen that opens the form stays below it, so the toast is shown over it.
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         body: Builder(
@@ -131,10 +131,13 @@ void main() {
     await tester.tap(find.text('Publish Article').last);
     await tester.pumpAndSettle();
 
-    expect(find.text('Your article has been published!'), findsOneWidget);
+    expect(find.text('Article published'), findsOneWidget);
     expect(closedWith, isA<JournalistArticleEntity>());
     final article = closedWith! as JournalistArticleEntity;
     expect(article.title, 'Local startup brings clean water');
     expect(article.author, 'Jane Doe');
+    // The toast closes by itself after a few seconds.
+    await tester.pump(const Duration(seconds: 5));
+    await tester.pumpAndSettle();
   });
 }

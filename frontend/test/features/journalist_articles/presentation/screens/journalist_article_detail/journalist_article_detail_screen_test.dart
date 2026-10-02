@@ -144,7 +144,10 @@ void main() {
     await tester.tap(find.byTooltip('Send comment'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Your comment could not be sent. Please try again.'), findsOneWidget);
+    expect(find.text('Your comment could not be sent'), findsOneWidget);
     expect(tester.widget<TextField>(find.byType(TextField)).controller!.text, 'Will the café stay open at night too?');
+    // The toast closes by itself after a few seconds.
+    await tester.pump(const Duration(seconds: 5));
+    await tester.pumpAndSettle();
   });
 }

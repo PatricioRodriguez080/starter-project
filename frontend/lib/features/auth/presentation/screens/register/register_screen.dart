@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:news_app_clean_architecture/config/theme/app_buttons.dart';
 import 'package:news_app_clean_architecture/config/theme/app_themes.dart';
+import 'package:news_app_clean_architecture/config/theme/app_toasts.dart';
 import 'package:news_app_clean_architecture/features/auth/domain/entities/credentials_rules.dart';
 import 'package:news_app_clean_architecture/features/auth/presentation/bloc/register/register_cubit.dart';
 import 'package:news_app_clean_architecture/features/auth/presentation/bloc/register/register_state.dart';
@@ -64,7 +65,7 @@ class RegisterScreen extends StatelessWidget {
       Navigator.popUntil(context, (route) => route.isFirst);
     }
     if (state is RegisterFailure) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(authFailureMessage(state.error))));
+      showAppToast(context, AppToast.error(authFailureMessage(state.error)));
     }
   }
 }

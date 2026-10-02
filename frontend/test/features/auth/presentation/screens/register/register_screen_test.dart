@@ -133,6 +133,9 @@ void main() {
 
     expect(find.text('There is already an account with this email.'), findsOneWidget);
     expect(find.byType(RegisterScreen), findsOneWidget);
+    // The toast closes by itself after a few seconds.
+    await tester.pump(const Duration(seconds: 5));
+    await tester.pumpAndSettle();
   });
 
   testWidgets('creates the account and closes', (tester) async {

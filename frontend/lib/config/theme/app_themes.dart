@@ -23,6 +23,9 @@ class AppPalette extends ThemeExtension<AppPalette> {
     skeletonBase: Color(0xFFE4EAF2),
     skeletonHighlight: Color(0xFFF5F8FC),
     error: Color(0xFFB3261E),
+    errorSoft: Color(0xFFFBE9E8),
+    success: Color(0xFF1F8A5B),
+    successSoft: Color(0xFFE3F4EC),
   );
 
   static const AppPalette dark = AppPalette(
@@ -44,6 +47,9 @@ class AppPalette extends ThemeExtension<AppPalette> {
     skeletonBase: Color(0xFF1F2630),
     skeletonHighlight: Color(0xFF2C3542),
     error: Color(0xFFF2B8B5),
+    errorSoft: Color(0xFF3A2224),
+    success: Color(0xFF5CC98E),
+    successSoft: Color(0xFF18322A),
   );
 
   final Color background;
@@ -64,6 +70,9 @@ class AppPalette extends ThemeExtension<AppPalette> {
   final Color skeletonBase;
   final Color skeletonHighlight;
   final Color error;
+  final Color errorSoft;
+  final Color success;
+  final Color successSoft;
 
   const AppPalette({
     required this.background,
@@ -84,6 +93,9 @@ class AppPalette extends ThemeExtension<AppPalette> {
     required this.skeletonBase,
     required this.skeletonHighlight,
     required this.error,
+    required this.errorSoft,
+    required this.success,
+    required this.successSoft,
   });
 
   @override
@@ -113,6 +125,9 @@ class AppPalette extends ThemeExtension<AppPalette> {
       skeletonBase: blend(skeletonBase, other.skeletonBase),
       skeletonHighlight: blend(skeletonHighlight, other.skeletonHighlight),
       error: blend(error, other.error),
+      errorSoft: blend(errorSoft, other.errorSoft),
+      success: blend(success, other.success),
+      successSoft: blend(successSoft, other.successSoft),
     );
   }
 }

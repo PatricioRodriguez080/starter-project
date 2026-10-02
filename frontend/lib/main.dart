@@ -4,7 +4,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:news_app_clean_architecture/config/routes/routes.dart';
 import 'package:news_app_clean_architecture/features/daily_news/presentation/bloc/article/remote/remote_article_event.dart';
 import 'package:news_app_clean_architecture/config/navigation/auth_gate.dart';
+import 'package:toastification/toastification.dart';
 import 'config/theme/app_themes.dart';
+import 'config/theme/app_toasts.dart';
 import 'features/daily_news/presentation/bloc/article/remote/remote_article_bloc.dart';
 import 'features/auth/presentation/bloc/session/session_cubit.dart';
 import 'features/settings/domain/entities/theme_preference.dart';
@@ -39,13 +41,16 @@ class MyApp extends StatelessWidget {
         BlocProvider<SessionCubit>.value(value: sl<SessionCubit>()),
       ],
       child: BlocBuilder<ThemeCubit, AppTheme>(
-        builder: (context, selectedTheme) => MaterialApp(
-          debugShowCheckedModeBanner: false,
-          theme: lightTheme(),
-          darkTheme: darkTheme(),
-          themeMode: selectedTheme.themeMode,
-          onGenerateRoute: AppRoutes.onGenerateRoutes,
-          home: const AuthGate(),
+        builder: (context, selectedTheme) => ToastificationConfigProvider(
+          config: appToastificationConfig,
+          child: MaterialApp(
+            debugShowCheckedModeBanner: false,
+            theme: lightTheme(),
+            darkTheme: darkTheme(),
+            themeMode: selectedTheme.themeMode,
+            onGenerateRoute: AppRoutes.onGenerateRoutes,
+            home: const AuthGate(),
+          ),
         ),
       ),
     );

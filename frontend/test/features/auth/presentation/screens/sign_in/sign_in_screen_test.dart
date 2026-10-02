@@ -99,6 +99,9 @@ void main() {
 
     expect(find.text('The email or password is incorrect.'), findsOneWidget);
     expect(find.byType(SignInScreen), findsOneWidget);
+    // The toast closes by itself after a few seconds.
+    await tester.pump(const Duration(seconds: 5));
+    await tester.pumpAndSettle();
   });
 
   testWidgets('hides the password until the eye is tapped', (tester) async {

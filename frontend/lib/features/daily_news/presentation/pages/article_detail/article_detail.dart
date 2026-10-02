@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:ionicons/ionicons.dart';
 import '../../../../../config/theme/app_skeletons.dart';
+import '../../../../../config/theme/app_toasts.dart';
 import '../../../../../injection_container.dart';
 import '../../../domain/entities/article.dart';
 import '../../bloc/article/local/local_article_bloc.dart';
@@ -121,10 +122,6 @@ class ArticleDetailsView extends HookWidget {
 
   void _onFloatingActionButtonPressed(BuildContext context) {
     BlocProvider.of<LocalArticleBloc>(context).add(SaveArticle(article!));
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Article saved successfully.'),
-      ),
-    );
+    showAppToast(context, const AppToast.success('Article saved', description: 'Find it in Saved.'));
   }
 }

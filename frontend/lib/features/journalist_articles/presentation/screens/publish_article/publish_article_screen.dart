@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:news_app_clean_architecture/config/theme/app_buttons.dart';
 import 'package:news_app_clean_architecture/config/theme/app_themes.dart';
+import 'package:news_app_clean_architecture/config/theme/app_toasts.dart';
 import 'package:news_app_clean_architecture/features/journalist_articles/domain/entities/article_draft.dart';
 import 'package:news_app_clean_architecture/features/journalist_articles/presentation/bloc/publish_article/publish_article_cubit.dart';
 import 'package:news_app_clean_architecture/features/journalist_articles/presentation/bloc/publish_article/publish_article_state.dart';
@@ -36,16 +37,18 @@ class PublishArticleScreen extends StatelessWidget {
 
   void _onStateChanged(BuildContext context, PublishArticleState state) {
     if (state is PublishArticleSuccess) {
-      _showMessage(context, 'Your article has been published!');
+      showAppToast(
+        context,
+        const AppToast.success('Article published', description: 'It is now in the Journalists tab.'),
+      );
       Navigator.pop(context, state.article);
     }
     if (state is PublishArticleFailure) {
-      _showMessage(context, 'Something went wrong. Please try again.');
+      showAppToast(
+        context,
+        const AppToast.error('Your article could not be published', description: 'Please try again.'),
+      );
     }
-  }
-
-  void _showMessage(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
   }
 }
 
